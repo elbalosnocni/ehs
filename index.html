@@ -13,22 +13,40 @@
     .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; cursor: pointer; }
     .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background-color: #0284c7; }
     .kpi-card { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .kpi-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
-    .kpi-value { font-size: 1.8rem; font-weight: 800; }
+    .kpi-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
+    .kpi-value { font-size: 1.5rem; font-weight: 800; }
     .tab-content-section { display: none; }
     .tab-content-section.active { display: block; }
+    
+    /* Tối ưu riêng cho Mobile */
+    @media (max-width: 767.98px) {
+      .sidebar { min-height: auto; }
+      .table-responsive-mobile { display: block; width: 100%; overflow-x: auto; }
+    }
   </style>
 </head>
 <body>
 
+<!-- NAVBAR TRÊN CÙNG (Hiển thị đẹp trên Điện thoại & Tablet) -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold fs-6" href="#">
+      <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+
 <div class="container-fluid">
   <div class="row">
-    <!-- Menu bên trái -->
-    <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
-      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary">
+    <!-- Menu Sidebar (Desktop hiển thị cố định bên trái, Mobile thu gọn vào nút ☰) -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
+      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary d-none d-md-block">
         <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
       </div>
-      <ul class="nav flex-column mt-3">
+      <ul class="nav flex-column mt-md-3">
         <li class="nav-item"><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i>Dashboard</a></li>
         <li class="nav-item"><a class="nav-link" onclick="switchTab('accident', this)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Tai nạn</a></li>
         <li class="nav-item"><a class="nav-link" onclick="switchTab('investigation', this)"><i class="fa-solid fa-magnifying-glass me-2"></i>Điều tra</a></li>
@@ -44,59 +62,60 @@
 
       <!-- TAB 1: DASHBOARD -->
       <div id="tab-dashboard" class="tab-content-section active">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h1 class="h4 font-weight-bold">EHS MANAGER DASHBOARD 2026</h1>
+        <div class="d-flex flex-wrap justify-content-between align-items-center pb-2 mb-3 border-bottom gap-2">
+          <h1 class="h5 font-weight-bold mb-0">EHS MANAGER DASHBOARD 2026</h1>
           <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
             <i class="fa-solid fa-plus me-1"></i> Báo cáo vụ tai nạn mới
           </button>
         </div>
 
-        <div class="row g-3 mb-4">
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-primary border-4">
+        <div class="row g-2 mb-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-primary border-4">
               <div class="kpi-title">Tổng NLĐ</div>
               <div class="kpi-value text-primary" id="kpi-total-emp">0</div>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-danger border-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-danger border-4">
               <div class="kpi-title">Tai nạn năm</div>
               <div class="kpi-value text-danger" id="kpi-accidents">00</div>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-warning border-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-warning border-4">
               <div class="kpi-title">Lost Time</div>
               <div class="kpi-value text-warning" id="kpi-lost-time">00</div>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-info border-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-info border-4">
               <div class="kpi-title">Near Miss</div>
               <div class="kpi-value text-info" id="kpi-near-miss">00</div>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-secondary border-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-secondary border-4">
               <div class="kpi-title">Đang xử lý</div>
               <div class="kpi-value text-secondary" id="kpi-pending">00</div>
             </div>
           </div>
-          <div class="col-md-2">
-            <div class="card kpi-card p-3 border-start border-success border-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-success border-4">
               <div class="kpi-title">Đã hoàn tất</div>
               <div class="kpi-value text-success" id="kpi-completed">00</div>
             </div>
           </div>
         </div>
 
+        <!-- Bảng danh sách (Hỗ trợ cuộn ngang mượt trên điện thoại) -->
         <div class="card shadow-sm mb-4">
-          <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+          <div class="card-header bg-white font-weight-bold d-flex flex-wrap justify-content-between align-items-center gap-1">
             <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
-            <span class="badge bg-light text-dark">🔴 Chưa điều tra | 🟡 Chờ BHXH | 🟢 Hoàn tất</span>
+            <span class="badge bg-light text-dark small">🔴 Chưa điều tra | 🟡 Chờ BHXH | 🟢 Hoàn tất</span>
           </div>
-          <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
               <thead class="table-light">
                 <tr>
                   <th>Mã Hồ Sơ</th>
@@ -121,40 +140,40 @@
       <!-- TAB 2: TAI NẠN -->
       <div id="tab-accident" class="tab-content-section">
         <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Chi tiết Vụ việc Tai nạn</h4>
+          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
           <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
             <i class="fa-solid fa-plus me-1"></i> Thêm mới
           </button>
         </div>
         <div class="card shadow-sm p-3 mb-3">
           <div class="row g-2">
-            <div class="col-md-4">
-              <input type="text" class="form-control form-control-sm" placeholder="Tìm theo tên, Mã NV hoặc Mã hồ sơ...">
+            <div class="col-12 col-md-4">
+              <input type="text" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS...">
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <select class="form-select form-select-sm">
-                <option value="">-- Tất cả Bộ phận --</option>
+                <option value="">-- Bộ phận --</option>
                 <option>Xưởng Cơ Khí</option>
                 <option>Xưởng 1</option>
                 <option>Kho NVL</option>
               </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-6 col-md-3">
               <select class="form-select form-select-sm">
-                <option value="">-- Tất cả Loại sự cố --</option>
+                <option value="">-- Sự cố --</option>
                 <option>Lost Time</option>
                 <option>Medical Treatment</option>
                 <option>Near Miss</option>
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-md-2">
               <button class="btn btn-secondary btn-sm w-100"><i class="fa-solid fa-filter me-1"></i>Lọc</button>
             </div>
           </div>
         </div>
         <div class="card shadow-sm">
-          <div class="card-body p-0">
-            <table class="table table-striped align-middle mb-0">
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-striped align-middle mb-0 text-nowrap">
               <thead class="table-light">
                 <tr>
                   <th>Mã HS</th>
@@ -167,7 +186,7 @@
                 </tr>
               </thead>
               <tbody id="accident-full-table">
-                <tr><td colspan="7" class="text-center text-muted py-3">Dữ liệu tổng hợp từ hệ thống...</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-3">Dữ liệu tổng hợp...</td></tr>
               </tbody>
             </table>
           </div>
@@ -176,34 +195,34 @@
 
       <!-- TAB 3: ĐIỀU TRA -->
       <div id="tab-investigation" class="tab-content-section">
-        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Điều tra & Root Cause (5 Why / Fishbone)</h4>
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Điều tra & Root Cause (5 Why)</h4>
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <div class="card shadow-sm">
-              <div class="card-header bg-light fw-bold">Chọn Hồ sơ điều tra</div>
-              <div class="list-group list-group-flush" id="investigation-list">
+              <div class="card-header bg-light fw-bold small">Chọn Hồ sơ điều tra</div>
+              <div class="list-group list-group-flush small" id="investigation-list">
                 <a href="#" class="list-group-item list-group-item-action active">TNLĐ-2026-0001 - LÝ THÀNH CÔNG</a>
               </div>
             </div>
           </div>
-          <div class="col-md-8">
+          <div class="col-12 col-md-8">
             <div class="card shadow-sm p-3">
-              <h5 class="card-title text-primary">Phân tích nguyên nhân vụ việc: TNLĐ-2026-0001</h5>
-              <hr>
+              <h6 class="card-title text-primary fw-bold">Phân tích nguyên nhân: TNLĐ-2026-0001</h6>
+              <hr class="my-2">
               <form>
                 <div class="mb-3">
-                  <label class="form-label fw-bold">Nguyên nhân trực tiếp:</label>
-                  <textarea class="form-control" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
+                  <label class="form-label fw-bold small">Nguyên nhân trực tiếp:</label>
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-bold">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
-                  <textarea class="form-control" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
+                  <label class="form-label fw-bold small">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
+                  <textarea class="form-control form-control-sm" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-bold">Biện pháp khắc phục (CAPA):</label>
-                  <textarea class="form-control" rows="2" placeholder="Hành động khắc phục và hạn hoàn thành..."></textarea>
+                  <label class="form-label fw-bold small">Biện pháp khắc phục (CAPA):</label>
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Hành động khắc phục..."></textarea>
                 </div>
-                <button type="button" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin điều tra</button>
+                <button type="button" class="btn btn-success btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin</button>
               </form>
             </div>
           </div>
@@ -213,20 +232,20 @@
       <!-- TAB 4: NGƯỜI LAO ĐỘNG -->
       <div id="tab-employee" class="tab-content-section">
         <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="mb-0"><i class="fa-solid fa-users text-primary me-2"></i>Danh sách Người lao động</h4>
-          <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-upload me-1"></i>Import Excel/Sheet</button>
+          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-users text-primary me-2"></i>Người lao động</h4>
+          <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-upload me-1"></i>Import</button>
         </div>
-        <div class="card shadow-sm p-3 mb-3">
-          <input type="text" class="form-control" placeholder="Tìm kiếm nhanh nhân viên trong tổng số 3.000 người...">
+        <div class="card shadow-sm p-2 mb-3">
+          <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm nhân viên trong 3.000 người...">
         </div>
         <div class="card shadow-sm">
-          <div class="card-body p-0">
-            <table class="table table-hover align-middle mb-0">
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
               <thead class="table-light">
                 <tr>
                   <th>Mã NV</th>
                   <th>Họ và Tên</th>
-                  <th>Bộ phận / Factory</th>
+                  <th>Bộ phận</th>
                   <th>Chức danh</th>
                   <th>Năm sinh</th>
                 </tr>
@@ -247,54 +266,53 @@
 
       <!-- TAB 5: HỒ SƠ BHXH -->
       <div id="tab-bhxh" class="tab-content-section">
-        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>Theo dõi Hồ sơ BHXH & Chế độ TNLĐ</h4>
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>Theo dõi Hồ sơ BHXH</h4>
         <div class="card shadow-sm p-3">
-          <p class="text-muted mb-2">Trạng thái giải quyết chế độ Bảo hiểm xã hội cho các vụ tai nạn lao động.</p>
-          <table class="table table-bordered align-middle">
-            <thead class="table-light">
-              <tr>
-                <th>Mã Hồ Sơ</th>
-                <th>Tên NLĐ</th>
-                <th>Ngày bị nạn</th>
-                <th>Số ngày nghỉ BHXH</th>
-                <th>Trạng thái nộp HS</th>
-                <th>Tiền trợ cấp dự kiến</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>TNLĐ-2026-0001</td>
-                <td>LÝ THÀNH CÔNG</td>
-                <td>12/06/2026</td>
-                <td>00 ngày</td>
-                <td><span class="badge bg-warning text-dark">Chờ hoàn thiện HS</span></td>
-                <td>0 VNĐ</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive-mobile">
+            <table class="table table-bordered align-middle text-nowrap mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã HS</th>
+                  <th>Tên NLĐ</th>
+                  <th>Ngày bị nạn</th>
+                  <th>Số ngày nghỉ</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>TNLĐ-2026-0001</td>
+                  <td>LÝ THÀNH CÔNG</td>
+                  <td>12/06/2026</td>
+                  <td>00 ngày</td>
+                  <td><span class="badge bg-warning text-dark">Chờ hoàn thiện</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
       <!-- TAB 6: CHI PHÍ -->
       <div id="tab-cost" class="tab-content-section">
-        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>Quản lý Chi phí Tai nạn Lao động</h4>
-        <div class="row g-3 mb-3">
-          <div class="col-md-4">
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>Chi phí Tai nạn Lao động</h4>
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-md-4">
             <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold">Chi phí y tế / Sơ cứu:</span>
-              <span class="fs-4 text-danger fw-bold">0 VNĐ</span>
+              <span class="text-muted fw-bold small">Chi phí y tế:</span>
+              <span class="fs-5 text-danger fw-bold">0 VNĐ</span>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold">Trợ cấp lương nghỉ việc:</span>
-              <span class="fs-4 text-warning fw-bold">0 VNĐ</span>
+              <span class="text-muted fw-bold small">Trợ cấp lương:</span>
+              <span class="fs-5 text-warning fw-bold">0 VNĐ</span>
             </div>
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-md-4">
             <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold">Tổng chi phí thiệt hại:</span>
-              <span class="fs-4 text-dark fw-bold">0 VNĐ</span>
+              <span class="text-muted fw-bold small">Tổng chi phí:</span>
+              <span class="fs-5 text-dark fw-bold">0 VNĐ</span>
             </div>
           </div>
         </div>
@@ -302,20 +320,20 @@
 
       <!-- TAB 7: BÁO CÁO & WORD -->
       <div id="tab-reports" class="tab-content-section">
-        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>Báo cáo Thống kê & Báo cáo Word</h4>
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>Báo cáo Thống kê & Word</h4>
         <div class="row g-3">
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card shadow-sm p-3">
-              <h5><i class="fa-solid fa-file-export me-2"></i>Xuất Biên bản Điều tra TNLĐ</h5>
-              <p class="text-muted">Tự động xuất file Word / PDF theo mẫu quy định nhà nước.</p>
-              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản Mẫu (Word)</button>
+              <h6 class="fw-bold"><i class="fa-solid fa-file-export me-2"></i>Biên bản Điều tra TNLĐ</h6>
+              <p class="text-muted small">Xuất file Word theo mẫu quy định.</p>
+              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản (Word)</button>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card shadow-sm p-3">
-              <h5><i class="fa-solid fa-chart-line me-2"></i>Báo cáo định kỳ Sở Lao Động</h5>
-              <p class="text-muted">Tổng hợp số liệu tai nạn 6 tháng và 1 năm.</p>
-              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Excel Báo cáo</button>
+              <h6 class="fw-bold"><i class="fa-solid fa-chart-line me-2"></i>Báo cáo Sở Lao Động</h6>
+              <p class="text-muted small">Báo cáo định kỳ 6 tháng & 1 năm.</p>
+              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Báo cáo Excel</button>
             </div>
           </div>
         </div>
@@ -330,26 +348,26 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title"><i class="fa-solid fa-plus-circle me-2"></i>Báo Cáo Tai Nạn Lao Động Mới</h5>
+        <h5 class="modal-title fs-6"><i class="fa-solid fa-plus-circle me-2"></i>Báo Cáo Tai Nạn Lao Động Mới</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="formNewAccident">
           <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Họ & Tên Nạn Nhân</label>
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-bold small">Họ & Tên Nạn Nhân</label>
               <input type="text" id="inputHoTen" class="form-control" placeholder="Nhập tên công nhân" required>
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">Mã Nhân Viên</label>
+            <div class="col-12 col-md-6">
+              <label class="form-label fw-bold small">Mã Nhân Viên</label>
               <input type="text" id="inputMaNV" class="form-control" placeholder="Ví dụ: PR7300" required>
             </div>
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Thời gian xảy ra</label>
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-bold small">Thời gian xảy ra</label>
               <input type="datetime-local" id="inputNgay" class="form-control" required>
             </div>
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Bộ phận / Xưởng</label>
+            <div class="col-6 col-md-4">
+              <label class="form-label fw-bold small">Bộ phận / Xưởng</label>
               <select id="selectBoPhan" class="form-select">
                 <option>Xưởng Cơ Khí</option>
                 <option>Xưởng 1</option>
@@ -359,8 +377,8 @@
                 <option>Kho NVL</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Loại Sự Cố</label>
+            <div class="col-6 col-md-4">
+              <label class="form-label fw-bold small">Loại Sự Cố</label>
               <select id="selectLoai" class="form-select">
                 <option value="Lost Time">Lost Time (Mất ngày công)</option>
                 <option value="Medical Treatment">Medical Treatment (Sơ y tế)</option>
@@ -368,15 +386,15 @@
               </select>
             </div>
             <div class="col-12">
-              <label class="form-label fw-bold">Mô tả ngắn diễn biến</label>
+              <label class="form-label fw-bold small">Mô tả ngắn diễn biến</label>
               <textarea id="inputMoTa" class="form-control" rows="3" placeholder="Mô tả chi tiết vị trí và diễn biến sự cố..."></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-success" id="btnSaveAccident" onclick="submitAccidentForm()">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success btn-sm" id="btnSaveAccident" onclick="submitAccidentForm()">
           <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo
         </button>
       </div>
@@ -389,48 +407,48 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-dark text-white">
-        <h5 class="modal-title"><i class="fa-solid fa-file-contract me-2"></i>Chi Tiết Hồ Sơ Tai Nạn</h5>
+        <h5 class="modal-title fs-6"><i class="fa-solid fa-file-contract me-2"></i>Chi Tiết Hồ Sơ Tai Nạn</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label text-muted fw-bold mb-0">Mã Hồ Sơ:</label>
-            <div class="fs-5 text-primary fw-bold" id="detailMaHoSo">-</div>
+          <div class="col-6 col-md-6">
+            <label class="form-label text-muted fw-bold mb-0 small">Mã Hồ Sơ:</label>
+            <div class="fs-6 text-primary fw-bold" id="detailMaHoSo">-</div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label text-muted fw-bold mb-0">Thời Gian Xảy Ra:</label>
-            <div class="fw-bold" id="detailNgay">-</div>
+          <div class="col-6 col-md-6">
+            <label class="form-label text-muted fw-bold mb-0 small">Thời Gian Xảy Ra:</label>
+            <div class="fw-bold small" id="detailNgay">-</div>
           </div>
-          <hr class="my-2">
-          <div class="col-md-6">
-            <label class="form-label text-muted fw-bold mb-0">Họ & Tên Nạn Nhân:</label>
-            <div class="fw-bold" id="detailHoTen">-</div>
+          <hr class="my-1">
+          <div class="col-6 col-md-6">
+            <label class="form-label text-muted fw-bold mb-0 small">Họ & Tên Nạn Nhân:</label>
+            <div class="fw-bold small" id="detailHoTen">-</div>
           </div>
-          <div class="col-md-6">
-            <label class="form-label text-muted fw-bold mb-0">Mã Nhân Viên:</label>
-            <div class="fw-bold" id="detailMaNV">-</div>
+          <div class="col-6 col-md-6">
+            <label class="form-label text-muted fw-bold mb-0 small">Mã Nhân Viên:</label>
+            <div class="fw-bold small" id="detailMaNV">-</div>
           </div>
-          <div class="col-md-4">
-            <label class="form-label text-muted fw-bold mb-0">Bộ Phận / Xưởng:</label>
-            <div class="fw-bold" id="detailBoPhan">-</div>
+          <div class="col-4 col-md-4">
+            <label class="form-label text-muted fw-bold mb-0 small">Bộ Phận / Xưởng:</label>
+            <div class="fw-bold small" id="detailBoPhan">-</div>
           </div>
-          <div class="col-md-4">
-            <label class="form-label text-muted fw-bold mb-0">Loại Sự Cố:</label>
+          <div class="col-4 col-md-4">
+            <label class="form-label text-muted fw-bold mb-0 small">Loại Sự Cố:</label>
             <div><span class="badge bg-info text-dark" id="detailLoai">-</span></div>
           </div>
-          <div class="col-md-4">
-            <label class="form-label text-muted fw-bold mb-0">Trạng Thái:</label>
+          <div class="col-4 col-md-4">
+            <label class="form-label text-muted fw-bold mb-0 small">Trạng Thái:</label>
             <div><span class="badge bg-warning text-dark" id="detailTrangThai">-</span></div>
           </div>
           <div class="col-12">
-            <label class="form-label text-muted fw-bold mb-0">Mô Tả Diễn Biến Event:</label>
-            <div class="p-3 bg-light rounded border mt-1" id="detailMoTa" style="white-space: pre-line;">-</div>
+            <label class="form-label text-muted fw-bold mb-0 small">Mô Tả Diễn Biến Event:</label>
+            <div class="p-2 bg-light rounded border mt-1 small" id="detailMoTa" style="white-space: pre-line;">-</div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
       </div>
     </div>
   </div>
@@ -447,7 +465,7 @@
     loadAccidentList();
   });
 
-  // Chuyển Tab Menu Bên Trái
+  // Chuyển Tab Menu & Tự đóng Menu khi dùng trên điện thoại
   function switchTab(tabName, element) {
     document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
@@ -455,6 +473,13 @@
     var targetTab = document.getElementById('tab-' + tabName);
     if(targetTab) targetTab.classList.add('active');
     if(element) element.classList.add('active');
+
+    // Tự thu gọn Menu trên mobile sau khi chọn tab
+    var sidebarMenu = document.getElementById('sidebarMenu');
+    var bsCollapse = bootstrap.Collapse.getInstance(sidebarMenu);
+    if (bsCollapse && window.innerWidth < 768) {
+      bsCollapse.hide();
+    }
   }
 
   // Load KPI từ Sheet
