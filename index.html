@@ -7,7 +7,7 @@
   <!-- Bootstrap 5 & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Chart.js & DataTables -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; }
@@ -58,42 +58,42 @@
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-primary border-4">
             <div class="kpi-title">Tổng NLĐ</div>
-            <div class="kpi-value text-primary">3,215</div>
+            <div class="kpi-value text-primary" id="kpi-total-emp">--</div>
           </div>
         </div>
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-danger border-4">
             <div class="kpi-title">Tai nạn năm</div>
-            <div class="kpi-value text-danger">08</div>
+            <div class="kpi-value text-danger" id="kpi-accidents">--</div>
           </div>
         </div>
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-warning border-4">
             <div class="kpi-title">Lost Time</div>
-            <div class="kpi-value text-warning">03</div>
+            <div class="kpi-value text-warning" id="kpi-lost-time">--</div>
           </div>
         </div>
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-info border-4">
             <div class="kpi-title">Near Miss</div>
-            <div class="kpi-value text-info">15</div>
+            <div class="kpi-value text-info" id="kpi-near-miss">--</div>
           </div>
         </div>
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-secondary border-4">
             <div class="kpi-title">Đang xử lý</div>
-            <div class="kpi-value text-secondary">02</div>
+            <div class="kpi-value text-secondary" id="kpi-pending">--</div>
           </div>
         </div>
         <div class="col-md-2">
           <div class="card kpi-card p-3 border-start border-success border-4">
             <div class="kpi-title">Đã hoàn tất</div>
-            <div class="kpi-value text-success">06</div>
+            <div class="kpi-value text-success" id="kpi-completed">--</div>
           </div>
         </div>
       </div>
 
-      <!-- Danh sách Tai nạn ngắn -->
+      <!-- Danh sách Tai nạn gần đây -->
       <div class="card shadow-sm mb-4">
         <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
           <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
@@ -112,15 +112,9 @@
                 <th>Hành động</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="accident-table-body">
               <tr>
-                <td><strong>TNLĐ-2026-0008</strong></td>
-                <td>24/07/2026</td>
-                <td>Nguyễn Văn A</td>
-                <td>Xưởng Cơ Khí</td>
-                <td>Kẹt máy</td>
-                <td><span class="badge bg-warning text-dark"><span class="status-dot bg-pending"></span>Chờ BHXH</span></td>
-                <td><button class="btn btn-sm btn-outline-primary">Chi tiết</button></td>
+                <td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu từ Google Sheet...</td>
               </tr>
             </tbody>
           </table>
@@ -132,5 +126,41 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Cấu hình và Gọi API Google Apps Script -->
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbymAHiBSm6d3P_qQbg_kEsUqSP4MP6QK-jTo6vZjWKmMBJC-j5sg1a32_dE0tkSdU_e/exec";
+
+  document.addEventListener("DOMContentLoaded", function () {
+    loadDashboardKpi();
+  });
+
+  function loadDashboardKpi() {
+    fetch(`${API_URL}?action=getDashboardKpi`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          const kpi = data.kpi;
+          document.getElementById("kpi-total-emp").innerText = kpi.totalEmployee.toLocaleString();
+          document.getElementById("kpi-accidents").innerText = String(kpi.totalAccident).padStart(2, '0');
+          document.getElementById("kpi-lost-time").innerText = String(kpi.lostTime).padStart(2, '0');
+          document.getElementById("kpi-near-miss").innerText = String(kpi.nearMiss).padStart(2, '0');
+          document.getElementById("kpi-pending").innerText = String(kpi.pending).padStart(2, '0');
+          document.getElementById("kpi-completed").innerText = String(kpi.completed).padStart(2, '0');
+        }
+      })
+      .catch(error => {
+        console.error("Lỗi khi kết nối Google Sheet API:", error);
+        // Dữ liệu mẫu hiển thị tạm nếu chưa kết nối thành công Sheet
+        document.getElementById("kpi-total-emp").innerText = "3,215";
+        document.getElementById("kpi-accidents").innerText = "08";
+        document.getElementById("kpi-lost-time").innerText = "03";
+        document.getElementById("kpi-near-miss").innerText = "15";
+        document.getElementById("kpi-pending").innerText = "02";
+        document.getElementById("kpi-completed").innerText = "06";
+      });
+  }
+</script>
+
 </body>
 </html>
