@@ -147,19 +147,19 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label fw-bold">Họ & Tên Nạn Nhân</label>
-              <input type="text" class="form-control" placeholder="Nhập tên công nhân" required>
+              <input type="text" id="inputHoTen" class="form-control" placeholder="Nhập tên công nhân" required>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-bold">Mã Nhân Viên</label>
-              <input type="text" class="form-control" placeholder="Ví dụ: NV-3829" required>
+              <input type="text" id="inputMaNV" class="form-control" placeholder="Ví dụ: PR7300" required>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-bold">Ngày xảy ra</label>
-              <input type="date" class="form-control" required>
+              <input type="date" id="inputNgay" class="form-control" required>
             </div>
             <div class="col-md-4">
               <label class="form-label fw-bold">Bộ phận / Xưởng</label>
-              <select class="form-select">
+              <select id="selectBoPhan" class="form-select">
                 <option>Xưởng Cơ Khí</option>
                 <option>Xưởng Lắp Ráp</option>
                 <option>Xưởng Sơn</option>
@@ -168,22 +168,24 @@
             </div>
             <div class="col-md-4">
               <label class="form-label fw-bold">Loại Sự Cố</label>
-              <select class="form-select">
-                <option>Lost Time (Mất ngày công)</option>
-                <option>Medical Treatment (Sơ y tế)</option>
-                <option>Near Miss (Suýt nguy)</option>
+              <select id="selectLoai" class="form-select">
+                <option value="Lost Time">Lost Time (Mất ngày công)</option>
+                <option value="Medical Treatment">Medical Treatment (Sơ y tế)</option>
+                <option value="Near Miss">Near Miss (Suýt nguy)</option>
               </select>
             </div>
             <div class="col-12">
               <label class="form-label fw-bold">Mô tả ngắn diễn biến</label>
-              <textarea class="form-control" rows="3" placeholder="Mô tả chi tiết vị trí và diễn biến sự cố..."></textarea>
+              <textarea id="inputMoTa" class="form-control" rows="3" placeholder="Mô tả chi tiết vị trí và diễn biến sự cố..."></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-success" onclick="alert('Đã gửi thông tin lên hệ thống!')">Lưu Báo Cáo</button>
+        <button type="button" class="btn btn-success" id="btnSaveAccident" onclick="submitAccidentForm()">
+          <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo
+        </button>
       </div>
     </div>
   </div>
@@ -258,6 +260,60 @@
           `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu trong Google Sheet.</td></tr>`;
       });
   }
+function submitAccidentForm() {
+  const btn = document.getElementById("btnSaveAccident");
+  
+  // Thu thập dữ liệu từ Form
+  const payload = {
+    action: "addAccident",
+    hoTen: document.getElementById("inputHoTen").value.trim(),
+    maNV: document.getElementById("inputMaNV").value.trim(),
+    ngay: document.getElementById("inputNgay").value,
+    boPhan: document.getElementById("selectBoPhan").value,
+    loai: document.getElementById("selectLoai").value,
+    moTa: document.getElementById("inputMoTa").value.trim()
+  };
+
+  if (!payload.hoTen || !payload.ngay) {
+    alert("Vui lòng điền đầy đủ Họ tên và Ngày xảy ra!");
+    return;
+  }
+
+  // Khóa nút để tránh bấm nhiều lần
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...`;
+
+  fetch(API_URL, {
+    method: "POST",
+    mode: "no-cors", // Bypass CORS cho Google Apps Script
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    alert("Đã lưu báo cáo thành công vào Google Sheet!");
+    
+    // Đóng Modal & Reset Form
+    const modalEl = document.getElementById('modalNewAccident');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    document.getElementById("formNewAccident").reset();
+
+    // Mở lại nút bấm & Tải lại dữ liệu Bảng
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+    
+    setTimeout(() => {
+      loadDashboardKpi();
+      loadAccidentList();
+    }, 1500);
+  })
+  .catch(err => {
+    console.error("Lỗi:", err);
+    alert("Có lỗi xảy ra khi lưu dữ liệu!");
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+  });
+}
 </script>
 
 </body>
