@@ -27,7 +27,45 @@
 </head>
 <body>
 
-<!-- NAVBAR TRÊN CÙNG (Hiển thị đẹp trên Điện thoại & Tablet) -->
+<!-- MODAL THÊM USER MỚI -->
+<div class="modal fade" id="modalAddUser" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fs-6"><i class="fa-solid fa-user-plus me-2"></i>Thêm Tài Khoản Mới</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddUser">
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Tên đăng nhập / Email</label>
+            <input type="text" class="form-control" id="newUsernameInput" placeholder="Ví dụ: user01" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Mật khẩu</label>
+            <input type="password" class="form-control" id="newUserPassInput" placeholder="Nhập mật khẩu" required minlength="6">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small">Phân quyền (Role)</label>
+            <select class="form-select" id="newUserRoleSelect">
+              <option value="user">User (Chỉ xem/báo cáo)</option>
+              <option value="admin">Admin (Toàn quyền)</option>
+            </select>
+          </div>
+          <div id="addUserAlert" class="alert alert-danger d-none" role="alert"></div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-success btn-sm" id="btnSubmitAddUser" onclick="submitAddUser()">
+          <i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR TRÊN CÙNG -->
 <nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none sticky-top">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold fs-6" href="#">
@@ -65,6 +103,9 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center pb-2 mb-3 border-bottom gap-2">
           <h1 class="h5 font-weight-bold mb-0">EHS MANAGER DASHBOARD 2026</h1>
           <div>
+            <button class="btn btn-sm btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#modalAddUser">
+              <i class="fa-solid fa-user-plus me-1"></i>Thêm User
+            </button> 
             <button id="btnOpenChangePass" class="btn btn-sm btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#modalChangePassword">
               <i class="fa-solid fa-lock me-1"></i>Đổi MK
             </button>
@@ -73,7 +114,7 @@
             </button>
           </div>
         </div>
-
+        
         <div class="row g-2 mb-4">
           <div class="col-6 col-md-2">
             <div class="card kpi-card p-2 p-md-3 border-start border-primary border-4">
@@ -513,6 +554,59 @@
     loadAccidentList();
   });
 
+  // Hàm gửi yêu cầu Thêm User mới lên Apps Script
+  function submitAddUser() {
+    const username = document.getElementById("newUsernameInput").value.trim();
+    const password = document.getElementById("newUserPassInput").value.trim();
+    const role = document.getElementById("newUserRoleSelect").value;
+    const alertBox = document.getElementById("addUserAlert");
+    const btn = document.getElementById("btnSubmitAddUser");
+
+    alertBox.classList.add("d-none");
+
+    if (!username || !password) {
+      alertBox.innerText = "Vui lòng nhập đầy đủ Tên đăng nhập và Mật khẩu!";
+      alertBox.classList.remove("d-none");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...`;
+
+    fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: "addUser",
+        username: username,
+        password: password,
+        role: role
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
+
+      if (data.status === "success") {
+        alert("Tạo tài khoản thành công!");
+        const modalElement = document.getElementById('modalAddUser');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+        document.getElementById("formAddUser").reset();
+      } else {
+        alertBox.innerText = data.message || "Lỗi khi tạo tài khoản!";
+        alertBox.classList.remove("d-none");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
+      alertBox.innerText = "Lỗi kết nối máy chủ, vui lòng thử lại!";
+      alertBox.classList.remove("d-none");
+    });
+  }
+  
   // Chuyển Tab Menu & Tự đóng Menu trên mobile
   function switchTab(tabName, element) {
     document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
@@ -596,28 +690,35 @@
 
   // Lọc bảng ở Tab Tai nạn
   function filterAccidentTable() {
-    const keyword = document.getElementById("filterKeyword").value.toLowerCase();
-    const boPhan = document.getElementById("filterBoPhan").value;
-    const loai = document.getElementById("filterLoai").value;
+    const keyword = (document.getElementById("filterKeyword")?.value || "").toLowerCase().trim();
+    const boPhan = document.getElementById("filterBoPhan")?.value || "";
+    const loai = document.getElementById("filterLoai")?.value || "";
     const tbody = document.getElementById("accident-full-table");
 
-    const filteredData = accidentDataStore.filter(item => {
-      const matchKeyword = (item.nguoiBiNan && item.nguoiBiNan.toLowerCase().includes(keyword)) ||
-                           (item.maNV && item.maNV.toLowerCase().includes(keyword)) ||
-                           (item.maHoSo && item.maHoSo.toLowerCase().includes(keyword));
-      const matchBoPhan = boPhan === "" || item.boPhan === boPhan;
-      const matchLoai = loai === "" || item.loai === loai;
+    if (!tbody) return;
+
+    let filtered = accidentDataStore.filter(item => {
+      let matchKeyword = !keyword || 
+        (item.maHoSo && item.maHoSo.toLowerCase().includes(keyword)) ||
+        (item.nguoiBiNan && item.nguoiBiNan.toLowerCase().includes(keyword)) ||
+        (item.maNV && item.maNV.toLowerCase().includes(keyword));
+
+      let matchBoPhan = !boPhan || item.boPhan === boPhan;
+      let matchLoai = !loai || item.loai === loai;
+
       return matchKeyword && matchBoPhan && matchLoai;
     });
 
-    if (filteredData.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy kết quả phù hợp.</td></tr>`;
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy dữ liệu phù hợp.</td></tr>`;
       return;
     }
 
     tbody.innerHTML = "";
-    filteredData.forEach((item, index) => {
+    filtered.forEach((item) => {
+      let originalIndex = accidentDataStore.findIndex(d => d.maHoSo === item.maHoSo);
       let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
+
       let rowHtml = `
         <tr>
           <td><strong>${item.maHoSo || ''}</strong></td>
@@ -628,8 +729,8 @@
           <td>${item.loai || ''}</td>
           <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
           <td>
-            <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
-              <i class="fa-solid fa-eye me-1"></i>Chi tiết
+            <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${originalIndex})">
+              <i class="fa-solid fa-eye me-1"></i>Xem
             </button>
           </td>
         </tr>
@@ -638,7 +739,7 @@
     });
   }
 
-  // Xem chi tiết
+  // Xem chi tiết hồ sơ trong Modal
   function viewDetail(index) {
     const item = accidentDataStore[index];
     if (!item) return;
@@ -646,76 +747,84 @@
     document.getElementById("detailMaHoSo").innerText = item.maHoSo || "-";
     document.getElementById("detailNgay").innerText = item.ngay || "-";
     document.getElementById("detailHoTen").innerText = item.nguoiBiNan || "-";
-    document.getElementById("detailMaNV").innerText = item.maNV || "N/A";
+    document.getElementById("detailMaNV").innerText = item.maNV || "-";
     document.getElementById("detailBoPhan").innerText = item.boPhan || "-";
     document.getElementById("detailLoai").innerText = item.loai || "-";
     document.getElementById("detailTrangThai").innerText = item.trangThai || "Chưa điều tra";
     document.getElementById("detailMoTa").innerText = item.moTa || "Không có mô tả chi tiết.";
 
-    const modal = new bootstrap.Modal(document.getElementById('modalDetailAccident'));
-    modal.show();
+    const detailModal = new bootstrap.Modal(document.getElementById('modalDetailAccident'));
+    detailModal.show();
   }
 
-  // Gửi Báo Cáo Tai Nạn Mới
+  // Gửi Báo cáo Tai nạn mới
   function submitAccidentForm() {
+    const hoTen = document.getElementById("inputHoTen").value.trim();
+    const maNV = document.getElementById("inputMaNV").value.trim();
+    const ngay = document.getElementById("inputNgay").value;
+    const boPhan = document.getElementById("selectBoPhan").value;
+    const loai = document.getElementById("selectLoai").value;
+    const moTa = document.getElementById("inputMoTa").value.trim();
     const btn = document.getElementById("btnSaveAccident");
 
-    const payload = {
-      action: "addAccident",
-      hoTen: document.getElementById("inputHoTen").value.trim(),
-      maNV: document.getElementById("inputMaNV").value.trim(),
-      ngay: document.getElementById("inputNgay").value,
-      boPhan: document.getElementById("selectBoPhan").value,
-      loai: document.getElementById("selectLoai").value,
-      moTa: document.getElementById("inputMoTa").value.trim()
-    };
-
-    if (!payload.hoTen || !payload.ngay) {
-      alert("Vui lòng điền đầy đủ Họ tên và Ngày xảy ra!");
+    if (!hoTen || !maNV || !ngay) {
+      alert("Vui lòng nhập đủ các thông tin bắt buộc: Họ tên, Mã NV, Thời gian!");
       return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...`;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...`;
 
     fetch(API_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      method: 'POST',
+      body: JSON.stringify({
+        action: "addAccident",
+        nguoiBiNan: hoTen,
+        maNV: maNV,
+        ngay: ngay,
+        boPhan: boPhan,
+        loai: loai,
+        moTa: moTa
+      })
     })
-    .then(() => {
-      alert("Đã gửi dữ liệu thành công!");
+    .then(res => res.json())
+    .then(data => {
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
-      
-      const modalElement = document.getElementById('modalNewAccident');
-      const modal = bootstrap.Modal.getInstance(modalElement);
-      if (modal) modal.hide();
-      
-      document.getElementById("formNewAccident").reset();
-      loadAccidentList();
-      loadDashboardKpi();
+
+      if (data.status === "success") {
+        alert("Báo cáo vụ tai nạn mới thành công!");
+        const modalElement = document.getElementById('modalNewAccident');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) modal.hide();
+        document.getElementById("formNewAccident").reset();
+        
+        // Tải lại dữ liệu
+        loadDashboardKpi();
+        loadAccidentList();
+      } else {
+        alert(data.message || "Không thể lưu báo cáo, vui lòng thử lại!");
+      }
     })
     .catch(err => {
       console.error(err);
-      alert("Có lỗi xảy ra khi lưu dữ liệu!");
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+      alert("Lỗi kết nối máy chủ!");
     });
   }
 
-  // Đổi Mật Khẩu
+  // Đổi mật khẩu
   function submitChangePassword() {
-    const oldPass = document.getElementById("oldPassInput").value;
-    const newPass = document.getElementById("newPassInput").value;
-    const confirmPass = document.getElementById("confirmPassInput").value;
+    const oldPass = document.getElementById("oldPassInput").value.trim();
+    const newPass = document.getElementById("newPassInput").value.trim();
+    const confirmPass = document.getElementById("confirmPassInput").value.trim();
     const alertBox = document.getElementById("changePassAlert");
 
     alertBox.classList.add("d-none");
 
     if (newPass !== confirmPass) {
-      alertBox.innerText = "Mật khẩu mới và Xác nhận mật khẩu không khớp!";
+      alertBox.innerText = "Mật khẩu mới và xác nhận mật khẩu không khớp!";
       alertBox.classList.remove("d-none");
       return;
     }
@@ -724,9 +833,9 @@
       method: 'POST',
       body: JSON.stringify({
         action: "changePassword",
-        role: currentRole,
-        oldPassword: oldPass,
-        newPassword: newPass
+        oldPass: oldPass,
+        newPass: newPass,
+        username: sessionStorage.getItem("username") || ""
       })
     })
     .then(res => res.json())
@@ -738,13 +847,13 @@
         if (modal) modal.hide();
         document.getElementById("formChangePassword").reset();
       } else {
-        alertBox.innerText = data.message || "Lỗi cập nhật mật khẩu";
+        alertBox.innerText = data.message || "Đổi mật khẩu thất bại!";
         alertBox.classList.remove("d-none");
       }
     })
     .catch(err => {
       console.error(err);
-      alertBox.innerText = "Lỗi kết nối, vui lòng thử lại!";
+      alertBox.innerText = "Lỗi hệ thống khi đổi mật khẩu!";
       alertBox.classList.remove("d-none");
     });
   }
