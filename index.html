@@ -10,16 +10,16 @@
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; }
     .sidebar { min-height: 100vh; background-color: #0f172a; color: #fff; }
-    .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; cursor: pointer; }
+    .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background-color: #0284c7; }
+    .sidebar .nav-link.disabled-tab { opacity: 0.5; cursor: not-allowed; }
     .kpi-card { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .kpi-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
     .kpi-value { font-size: 1.5rem; font-weight: 800; }
     .tab-content-section { display: none; }
     .tab-content-section.active { display: block; }
-    .admin-only { display: none !important; } /* Mặc định ẩn nút Admin với Khách */
+    .admin-only { display: none !important; } /* Mặc định ẩn nút dành cho Admin */
     
-    /* Responsive cho Mobile */
     @media (max-width: 767.98px) {
       .sidebar { min-height: auto; }
       .table-responsive-mobile { display: block; width: 100%; overflow-x: auto; }
@@ -37,7 +37,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="formLogin">
+        <form id="formLogin" onsubmit="event.preventDefault(); submitLogin();">
           <div class="mb-3">
             <label class="form-label fw-bold small">Tên đăng nhập</label>
             <input type="text" class="form-control form-control-sm" id="loginUsername" placeholder="Nhập Username" required>
@@ -47,7 +47,7 @@
             <input type="password" class="form-control form-control-sm" id="loginPassword" placeholder="Nhập Password" required>
           </div>
           <div id="loginAlert" class="alert alert-danger d-none py-1 small" role="alert"></div>
-          <button type="button" class="btn btn-primary btn-sm w-100" id="btnLoginSubmit" onclick="submitLogin()">
+          <button type="submit" class="btn btn-primary btn-sm w-100" id="btnLoginSubmit">
             <i class="fa-solid fa-key me-1"></i>Đăng Nhập
           </button>
         </form>
@@ -91,365 +91,6 @@
         </button>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- NAVBAR TRÊN CÙNG -->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold fs-6" href="#">
-      <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  </div>
-</nav>
-
-<div class="container-fluid">
-  <div class="row">
-    <!-- Menu Sidebar -->
-    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
-      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary d-none d-md-block">
-        <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
-      </div>
-      <ul class="nav flex-column mt-md-3">
-        <li class="nav-item"><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i>Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('accident', this)"><i class="fa-solid fa-triangle-exclamation me-2"></i>Tai nạn</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('investigation', this)"><i class="fa-solid fa-magnifying-glass me-2"></i>Điều tra</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('employee', this)"><i class="fa-solid fa-users me-2"></i>Người lao động</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('bhxh', this)"><i class="fa-solid fa-file-medical me-2"></i>Hồ sơ BHXH</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('cost', this)"><i class="fa-solid fa-sack-dollar me-2"></i>Chi phí</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('reports', this)"><i class="fa-solid fa-file-word me-2"></i>Báo cáo & Word</a></li>
-      </ul>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
-
-      <!-- TAB 1: DASHBOARD -->
-      <div id="tab-dashboard" class="tab-content-section active">
-        <div class="d-flex flex-wrap justify-content-between align-items-center pb-2 mb-3 border-bottom gap-2">
-          <h1 class="h5 font-weight-bold mb-0">EHS MANAGER DASHBOARD 2026</h1>
-          
-          <!-- KHU VỰC TÀI KHOẢN VÀ QUẢN TRỊ -->
-          <div class="d-flex align-items-center gap-2">
-            <!-- Nút hiển thị khi chưa Đăng nhập (Khách) -->
-            <button id="btnOpenLogin" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalLogin">
-              <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng Nhập Admin
-            </button>
-
-            <!-- Khối hiển thị khi đã Đăng nhập Admin -->
-            <div id="adminControls" class="d-none align-items-center gap-2">
-              <span class="badge bg-success small" id="currentUserBadge"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>
-              
-              <button class="btn btn-sm btn-outline-success admin-only" data-bs-toggle="modal" data-bs-target="#modalAddUser">
-                <i class="fa-solid fa-user-plus me-1"></i>Thêm User
-              </button> 
-              <button class="btn btn-sm btn-outline-secondary admin-only" data-bs-toggle="modal" data-bs-target="#modalChangePassword">
-                <i class="fa-solid fa-lock me-1"></i>Đổi MK
-              </button>
-              
-              <button class="btn btn-sm btn-danger" onclick="logout()">
-                <i class="fa-solid fa-power-off me-1"></i>Đăng xuất
-              </button>
-            </div>
-
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
-              <i class="fa-solid fa-plus me-1"></i> Báo cáo mới
-            </button>
-          </div>
-        </div>
-        
-        <div class="row g-2 mb-4">
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-primary border-4">
-              <div class="kpi-title">Tổng NLĐ</div>
-              <div class="kpi-value text-primary" id="kpi-total-emp">0</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-danger border-4">
-              <div class="kpi-title">Tai nạn năm</div>
-              <div class="kpi-value text-danger" id="kpi-accidents">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-warning border-4">
-              <div class="kpi-title">Lost Time</div>
-              <div class="kpi-value text-warning" id="kpi-lost-time">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-info border-4">
-              <div class="kpi-title">Near Miss</div>
-              <div class="kpi-value text-info" id="kpi-near-miss">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-secondary border-4">
-              <div class="kpi-title">Đang xử lý</div>
-              <div class="kpi-value text-secondary" id="kpi-pending">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-success border-4">
-              <div class="kpi-title">Đã hoàn tất</div>
-              <div class="kpi-value text-success" id="kpi-completed">00</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card shadow-sm mb-4">
-          <div class="card-header bg-white font-weight-bold d-flex flex-wrap justify-content-between align-items-center gap-1">
-            <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
-            <span class="badge bg-light text-dark small">🔴 Chưa điều tra | 🟡 Chờ BHXH | 🟢 Hoàn tất</span>
-          </div>
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-hover align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã Hồ Sơ</th>
-                  <th>Ngày</th>
-                  <th>Người bị nạn</th>
-                  <th>Bộ phận</th>
-                  <th>Loại</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody id="accident-table-body">
-                <tr><td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 2: TAI NẠN -->
-      <div id="tab-accident" class="tab-content-section">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
-          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
-            <i class="fa-solid fa-plus me-1"></i> Thêm mới
-          </button>
-        </div>
-        
-        <div class="card shadow-sm p-3 mb-3">
-          <div class="row g-2">
-            <div class="col-12 col-md-4">
-              <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS..." oninput="filterAccidentTable()">
-            </div>
-            <div class="col-6 col-md-3">
-              <select id="filterBoPhan" class="form-select form-select-sm" onchange="filterAccidentTable()">
-                <option value="">-- Bộ phận (Tất cả) --</option>
-                <option value="Xưởng Cơ Khí">Xưởng Cơ Khí</option>
-                <option value="Xưởng 1">Xưởng 1</option>
-                <option value="Xưởng 2">Xưởng 2</option>
-                <option value="Kho NVL">Kho NVL</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-3">
-              <select id="filterLoai" class="form-select form-select-sm" onchange="filterAccidentTable()">
-                <option value="">-- Sự cố (Tất cả) --</option>
-                <option value="Lost Time">Lost Time</option>
-                <option value="Medical Treatment">Medical Treatment</option>
-                <option value="Near Miss">Near Miss</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-2">
-              <button class="btn btn-secondary btn-sm w-100" onclick="filterAccidentTable()">
-                <i class="fa-solid fa-filter me-1"></i>Lọc
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card shadow-sm">
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-striped align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã HS</th>
-                  <th>Thời gian</th>
-                  <th>Họ tên</th>
-                  <th>Mã NV</th>
-                  <th>Bộ phận</th>
-                  <th>Loại</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody id="accident-full-table">
-                <tr><td colspan="8" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 3: ĐIỀU TRA (CẦN QUYỀN ADMIN) -->
-      <div id="tab-investigation" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Điều tra & Root Cause (5 Why)</h4>
-        
-        <!-- Thông báo khoá truy cập nếu là Khách -->
-        <div id="lockInvestigationAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
-          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Khu vực hạn chế truy cập</h5>
-          <p class="mb-0 small">Bạn đang duyệt web với quyền **Khách/User**. Vui lòng **Đăng Nhập Tài Khoản Cấp Trên/Admin** để xem thông tin điều tra chi tiết và cấu hình Root Cause 5-Why.</p>
-        </div>
-
-        <!-- Nội dung Tab chỉ hiện cho Admin -->
-        <div id="investigationContent" class="row g-3 d-none">
-          <div class="col-12 col-md-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light fw-bold small">Chọn Hồ sơ điều tra</div>
-              <div class="list-group list-group-flush small" id="investigation-list">
-                <a href="#" class="list-group-item list-group-item-action active">TNLĐ-2026-0001 - LÝ THÀNH CÔNG</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-8">
-            <div class="card shadow-sm p-3">
-              <h6 class="card-title text-primary fw-bold">Phân tích nguyên nhân: TNLĐ-2026-0001</h6>
-              <hr class="my-2">
-              <form>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Nguyên nhân trực tiếp:</label>
-                  <textarea class="form-control form-control-sm" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
-                  <textarea class="form-control form-control-sm" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Biện pháp khắc phục (CAPA):</label>
-                  <textarea class="form-control form-control-sm" rows="2" placeholder="Hành động khắc phục..."></textarea>
-                </div>
-                <button type="button" class="btn btn-success btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 4: NGƯỜI LAO ĐỘNG -->
-      <div id="tab-employee" class="tab-content-section">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-users text-primary me-2"></i>Người lao động</h4>
-          <button class="btn btn-outline-primary btn-sm admin-only"><i class="fa-solid fa-upload me-1"></i>Import Dữ Liệu</button>
-        </div>
-        <div class="card shadow-sm p-2 mb-3">
-          <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm nhân viên trong danh sách...">
-        </div>
-        <div class="card shadow-sm">
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-hover align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã NV</th>
-                  <th>Họ và Tên</th>
-                  <th>Bộ phận</th>
-                  <th>Chức danh</th>
-                  <th>Năm sinh</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>PR7300</td>
-                  <td>LÝ THÀNH CÔNG</td>
-                  <td>Xưởng Cơ Khí</td>
-                  <td>Công nhân vận hành</td>
-                  <td>1995</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 5: HỒ SƠ BHXH -->
-      <div id="tab-bhxh" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>Theo dõi Hồ sơ BHXH</h4>
-        <div class="card shadow-sm p-3">
-          <div class="table-responsive-mobile">
-            <table class="table table-bordered align-middle text-nowrap mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã HS</th>
-                  <th>Tên NLĐ</th>
-                  <th>Ngày bị nạn</th>
-                  <th>Số ngày nghỉ</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>TNLĐ-2026-0001</td>
-                  <td>LÝ THÀNH CÔNG</td>
-                  <td>12/06/2026</td>
-                  <td>00 ngày</td>
-                  <td><span class="badge bg-warning text-dark">Chờ hoàn thiện</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 6: CHI PHÍ (CẦN QUYỀN ADMIN) -->
-      <div id="tab-cost" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>Chi phí Tai nạn Lao động</h4>
-        
-        <!-- Thông báo khoá truy cập Chi phí đối với Khách -->
-        <div id="lockCostAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
-          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Dữ liệu Chi Phí Bảo Mật</h5>
-          <p class="mb-0 small">Chỉ có **Ban Giám Đốc / Admin EHS** mới có quyền xem thông tin chi phí y tế và trợ cấp lương tai nạn lao động.</p>
-        </div>
-
-        <div id="costContent" class="row g-2 mb-3 d-none">
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Chi phí y tế:</span>
-              <span class="fs-5 text-danger fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Trợ cấp lương:</span>
-              <span class="fs-5 text-warning fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Tổng chi phí:</span>
-              <span class="fs-5 text-dark fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 7: BÁO CÁO & WORD -->
-      <div id="tab-reports" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>Báo cáo Thống kê & Word</h4>
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <div class="card shadow-sm p-3">
-              <h6 class="fw-bold"><i class="fa-solid fa-file-export me-2"></i>Biên bản Điều tra TNLĐ</h6>
-              <p class="text-muted small">Xuất file Word theo mẫu quy định.</p>
-              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản (Word)</button>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="card shadow-sm p-3">
-              <h6 class="fw-bold"><i class="fa-solid fa-chart-line me-2"></i>Báo cáo Sở Lao Động</h6>
-              <p class="text-muted small">Báo cáo định kỳ 6 tháng & 1 năm.</p>
-              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Báo cáo Excel</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </main>
   </div>
 </div>
 
@@ -543,7 +184,365 @@
   </div>
 </div>
 
-<!-- SCRIPTS PHÂN QUYỀN VÀ XỬ LÝ DỮ LIỆU -->
+<!-- NAVBAR MOBILE -->
+<nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold fs-6" href="#"><i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- SIDEBAR MENU -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
+      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary d-none d-md-block">
+        <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
+      </div>
+      <ul class="nav flex-column mt-md-3">
+        <!-- TAB 1 & 2 Dành cho Guest & Admin -->
+        <li class="nav-item"><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i>1. Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" onclick="switchTab('accident', this)"><i class="fa-solid fa-triangle-exclamation me-2"></i>2. Báo cáo Tai nạn</a></li>
+        
+        <!-- TAB 3 -> 7 Yêu cầu quyền Admin -->
+        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('investigation', this)"><i class="fa-solid fa-magnifying-glass me-2"></i>3. Điều tra <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('employee', this)"><i class="fa-solid fa-users me-2"></i>4. Người lao động <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('bhxh', this)"><i class="fa-solid fa-file-medical me-2"></i>5. Hồ sơ BHXH <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('cost', this)"><i class="fa-solid fa-sack-dollar me-2"></i>6. Chi phí <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('reports', this)"><i class="fa-solid fa-file-word me-2"></i>7. Báo cáo & Word <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+      </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
+
+      <!-- HEADER CONTAINER & LOGIN STATUS -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center pb-2 mb-3 border-bottom gap-2">
+        <h1 class="h5 font-weight-bold mb-0">HỆ THỐNG QUẢN LÝ TNLĐ 2026</h1>
+        
+        <div class="d-flex align-items-center gap-2">
+          <!-- Nút Đăng nhập cho Guest -->
+          <button id="btnOpenLogin" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalLogin">
+            <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng Nhập Admin
+          </button>
+
+          <!-- Thanh điều khiển khi là Admin -->
+          <div id="adminControls" class="d-none align-items-center gap-2">
+            <span class="badge bg-success small" id="currentUserBadge"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>
+            
+            <button class="btn btn-sm btn-outline-success admin-only" data-bs-toggle="modal" data-bs-target="#modalAddUser">
+              <i class="fa-solid fa-user-plus me-1"></i>Thêm User
+            </button> 
+            <button class="btn btn-sm btn-outline-secondary admin-only" data-bs-toggle="modal" data-bs-target="#modalChangePassword">
+              <i class="fa-solid fa-lock me-1"></i>Đổi MK
+            </button>
+
+            <button class="btn btn-sm btn-danger" onclick="logout()">
+              <i class="fa-solid fa-power-off me-1"></i>Thoát
+            </button>
+          </div>
+
+          <!-- NÚT BÁO CÁO MỚI (CHỈ XUẤT HIỆN KHI LÀ ADMIN) -->
+          <button class="btn btn-primary btn-sm admin-only" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
+            <i class="fa-solid fa-plus me-1"></i> Báo cáo mới
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 1: DASHBOARD -->
+      <div id="tab-dashboard" class="tab-content-section active">
+        <div class="row g-2 mb-4">
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-primary border-4">
+              <div class="kpi-title">Tổng NLĐ</div>
+              <div class="kpi-value text-primary" id="kpi-total-emp">0</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-danger border-4">
+              <div class="kpi-title">Tai nạn năm</div>
+              <div class="kpi-value text-danger" id="kpi-accidents">00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-warning border-4">
+              <div class="kpi-title">Lost Time</div>
+              <div class="kpi-value text-warning" id="kpi-lost-time">00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-info border-4">
+              <div class="kpi-title">Near Miss</div>
+              <div class="kpi-value text-info" id="kpi-near-miss">00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-secondary border-4">
+              <div class="kpi-title">Đang xử lý</div>
+              <div class="kpi-value text-secondary" id="kpi-pending">00</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-2">
+            <div class="card kpi-card p-2 p-md-3 border-start border-success border-4">
+              <div class="kpi-title">Đã hoàn tất</div>
+              <div class="kpi-value text-success" id="kpi-completed">00</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white font-weight-bold d-flex flex-wrap justify-content-between align-items-center gap-1">
+            <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
+            <span class="badge bg-light text-dark small">🔴 Chưa điều tra | 🟡 Chờ BHXH | 🟢 Hoàn tất</span>
+          </div>
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã Hồ Sơ</th>
+                  <th>Ngày</th>
+                  <th>Người bị nạn</th>
+                  <th>Bộ phận</th>
+                  <th>Loại</th>
+                  <th>Trạng thái</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="accident-table-body">
+                <tr><td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: QUẢN LÝ TAI NẠN -->
+      <div id="tab-accident" class="tab-content-section">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
+          <button class="btn btn-primary btn-sm admin-only" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
+            <i class="fa-solid fa-plus me-1"></i> Thêm mới
+          </button>
+        </div>
+        
+        <div class="card shadow-sm p-3 mb-3">
+          <div class="row g-2">
+            <div class="col-12 col-md-4">
+              <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS..." oninput="filterAccidentTable()">
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="filterBoPhan" class="form-select form-select-sm" onchange="filterAccidentTable()">
+                <option value="">-- Bộ phận (Tất cả) --</option>
+                <option value="Xưởng Cơ Khí">Xưởng Cơ Khí</option>
+                <option value="Xưởng 1">Xưởng 1</option>
+                <option value="Xưởng 2">Xưởng 2</option>
+                <option value="Kho NVL">Kho NVL</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <select id="filterLoai" class="form-select form-select-sm" onchange="filterAccidentTable()">
+                <option value="">-- Sự cố (Tất cả) --</option>
+                <option value="Lost Time">Lost Time</option>
+                <option value="Medical Treatment">Medical Treatment</option>
+                <option value="Near Miss">Near Miss</option>
+              </select>
+            </div>
+            <div class="col-12 col-md-2">
+              <button class="btn btn-secondary btn-sm w-100" onclick="filterAccidentTable()">
+                <i class="fa-solid fa-filter me-1"></i>Lọc
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card shadow-sm">
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-striped align-middle mb-0 text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã HS</th>
+                  <th>Thời gian</th>
+                  <th>Họ tên</th>
+                  <th>Mã NV</th>
+                  <th>Bộ phận</th>
+                  <th>Loại</th>
+                  <th>Trạng thái</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody id="accident-full-table">
+                <tr><td colspan="8" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ĐIỀU TRA -->
+      <div id="tab-investigation" class="tab-content-section">
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>3. Điều tra & Root Cause (5 Why)</h4>
+        
+        <div id="lockInvestigationAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
+          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Khu vực hạn chế truy cập</h5>
+          <p class="mb-0 small">Vui lòng **Đăng Nhập Admin** để mở khóa cấu hình Root Cause 5-Why.</p>
+        </div>
+
+        <div id="investigationContent" class="row g-3 d-none">
+          <div class="col-12 col-md-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-light fw-bold small">Chọn Hồ sơ điều tra</div>
+              <div class="list-group list-group-flush small" id="investigation-list">
+                <a href="#" class="list-group-item list-group-item-action active">TNLĐ-2026-0001 - LÝ THÀNH CÔNG</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-8">
+            <div class="card shadow-sm p-3">
+              <h6 class="card-title text-primary fw-bold">Phân tích nguyên nhân: TNLĐ-2026-0001</h6>
+              <hr class="my-2">
+              <form>
+                <div class="mb-3">
+                  <label class="form-label fw-bold small">Nguyên nhân trực tiếp:</label>
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold small">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
+                  <textarea class="form-control form-control-sm" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold small">Biện pháp khắc phục (CAPA):</label>
+                  <textarea class="form-control form-control-sm" rows="2" placeholder="Hành động khắc phục..."></textarea>
+                </div>
+                <button type="button" class="btn btn-success btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: NGƯỜI LAO ĐỘNG -->
+      <div id="tab-employee" class="tab-content-section">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-users text-primary me-2"></i>4. Người lao động</h4>
+          <button class="btn btn-outline-primary btn-sm admin-only"><i class="fa-solid fa-upload me-1"></i>Import Dữ Liệu</button>
+        </div>
+        <div class="card shadow-sm p-2 mb-3">
+          <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm nhân viên trong danh sách...">
+        </div>
+        <div class="card shadow-sm">
+          <div class="card-body p-0 table-responsive-mobile">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã NV</th>
+                  <th>Họ và Tên</th>
+                  <th>Bộ phận</th>
+                  <th>Chức danh</th>
+                  <th>Năm sinh</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PR7300</td>
+                  <td>LÝ THÀNH CÔNG</td>
+                  <td>Xưởng Cơ Khí</td>
+                  <td>Công nhân vận hành</td>
+                  <td>1995</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: HỒ SƠ BHXH -->
+      <div id="tab-bhxh" class="tab-content-section">
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>5. Hồ sơ BHXH</h4>
+        <div class="card shadow-sm p-3">
+          <div class="table-responsive-mobile">
+            <table class="table table-bordered align-middle text-nowrap mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã HS</th>
+                  <th>Tên NLĐ</th>
+                  <th>Ngày bị nạn</th>
+                  <th>Số ngày nghỉ</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>TNLĐ-2026-0001</td>
+                  <td>LÝ THÀNH CÔNG</td>
+                  <td>12/06/2026</td>
+                  <td>00 ngày</td>
+                  <td><span class="badge bg-warning text-dark">Chờ hoàn thiện</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: CHI PHÍ -->
+      <div id="tab-cost" class="tab-content-section">
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>6. Chi phí TNLĐ</h4>
+        
+        <div id="lockCostAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
+          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Dữ liệu Chi Phí Bảo Mật</h5>
+          <p class="mb-0 small">Chỉ Ban Giám Đốc/Admin EHS mới có quyền xem thông tin chi phí y tế và trợ cấp lương.</p>
+        </div>
+
+        <div id="costContent" class="row g-2 mb-3 d-none">
+          <div class="col-12 col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold small">Chi phí y tế:</span>
+              <span class="fs-5 text-danger fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold small">Trợ cấp lương:</span>
+              <span class="fs-5 text-warning fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold small">Tổng chi phí:</span>
+              <span class="fs-5 text-dark fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: BÁO CÁO & WORD -->
+      <div id="tab-reports" class="tab-content-section">
+        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>7. Báo cáo Thống kê & Word</h4>
+        <div class="row g-3">
+          <div class="col-12 col-md-6">
+            <div class="card shadow-sm p-3">
+              <h6 class="fw-bold"><i class="fa-solid fa-file-export me-2"></i>Biên bản Điều tra TNLĐ</h6>
+              <p class="text-muted small">Xuất file Word theo mẫu quy định.</p>
+              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản (Word)</button>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="card shadow-sm p-3">
+              <h6 class="fw-bold"><i class="fa-solid fa-chart-line me-2"></i>Báo cáo Sở Lao Động</h6>
+              <p class="text-muted small">Báo cáo định kỳ 6 tháng & 1 năm.</p>
+              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Báo cáo Excel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- JAVASCRIPT PHÂN QUYỀN VÀ XỬ LÝ DỮ LIỆU -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -551,12 +550,12 @@
   let accidentDataStore = [];
 
   document.addEventListener("DOMContentLoaded", function () {
-    checkUserRoleUI(); // Kiểm tra trạng thái Đăng nhập/Phân quyền ngay khi mở trang
+    checkUserRoleUI(); 
     loadDashboardKpi();
     loadAccidentList();
   });
 
-  // HÀM KIỂM TRA QUYỀN TRUY CẬP VÀ CẬP NHẬT GIAO DIỆN
+  // HÀM KIỂM TRA QUYỀN VÀ CẬP NHẬT TRẠNG THÁI GIAO DIỆN KHÓA/MỞ
   function checkUserRoleUI() {
     const role = sessionStorage.getItem("user_role") || "guest";
     const username = sessionStorage.getItem("username") || "";
@@ -578,27 +577,38 @@
       adminControls.classList.add("d-flex");
       currentUserBadge.innerHTML = `<i class="fa-solid fa-user-shield me-1"></i>${username} (Admin)`;
 
-      // Mở các nút chỉ dành cho Admin
+      // Hiện các nút dành riêng cho Admin
       document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("d-none"));
 
-      // Mở Tab Điều tra
+      // Mở khóa bấm các Tab 3 -> 7 ở Sidebar
+      document.querySelectorAll(".sidebar .nav-link").forEach(el => {
+        el.classList.remove("disabled-tab");
+      });
+      document.querySelectorAll(".small-lock").forEach(el => el.classList.add("d-none"));
+
+      // Mở nội dung Tab 3 & Tab 6
       if(lockInvestigationAlert) lockInvestigationAlert.classList.add("d-none");
       if(investigationContent) investigationContent.classList.remove("d-none");
 
-      // Mở Tab Chi phí
       if(lockCostAlert) lockCostAlert.classList.add("d-none");
       if(costContent) costContent.classList.remove("d-none");
 
     } else {
-      // Quyền Khách / Chưa đăng nhập
+      // Chế độ Khách (Guest)
       btnOpenLogin.classList.remove("d-none");
       adminControls.classList.add("d-none");
       adminControls.classList.remove("d-flex");
 
-      // Ẩn tất cả nút nhạy cảm
+      // Ẩn tất cả các nút nhập liệu/thao tác Admin
       document.querySelectorAll(".admin-only").forEach(el => el.classList.add("d-none"));
 
-      // Khóa Tab Điều tra & Chi phí
+      // Khóa bấm các Tab Sidebar (Tab 3 -> 7)
+      document.querySelectorAll(".sidebar .nav-link").forEach((el, idx) => {
+        if(idx >= 2) el.classList.add("disabled-tab");
+      });
+      document.querySelectorAll(".small-lock").forEach(el => el.classList.remove("d-none"));
+
+      // Ẩn nội dung chi tiết Tab 3 & 6, hiện Alert nhắc nhở
       if(lockInvestigationAlert) lockInvestigationAlert.classList.remove("d-none");
       if(investigationContent) investigationContent.classList.add("d-none");
 
@@ -607,7 +617,32 @@
     }
   }
 
-  // HÀM XỬ LÝ ĐĂNG NHẬP
+  // CHUYỂN TAB CÓ CHECK QUYỀN
+  function switchTab(tabName, element) {
+    const role = sessionStorage.getItem("user_role") || "guest";
+    
+    // Nếu là Guest mà cố tình click vào các Tab bảo mật 3 -> 7
+    if (role !== "admin" && ['investigation', 'employee', 'bhxh', 'cost', 'reports'].includes(tabName)) {
+      alert("🔒 BẠN ĐANG TRUY CẬP VỚI QUYỀN KHÁCH!\nChỉ Tab 1 (Dashboard) và Tab 2 (Tai nạn) được mở xem. Vui lòng bấm 'Đăng Nhập Admin' để xem toàn bộ.");
+      return;
+    }
+
+    document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
+
+    var targetTab = document.getElementById('tab-' + tabName);
+    if(targetTab) targetTab.classList.add('active');
+    if(element) element.classList.add('active');
+
+    // Tự động thu gọn Sidebar trên Mobile khi bấm chuyển Tab
+    var sidebarMenu = document.getElementById('sidebarMenu');
+    var bsCollapse = bootstrap.Collapse.getInstance(sidebarMenu);
+    if (bsCollapse && window.innerWidth < 768) {
+      bsCollapse.hide();
+    }
+  }
+
+  // ĐĂNG NHẬP
   function submitLogin() {
     const usernameInput = document.getElementById("loginUsername").value.trim();
     const passwordInput = document.getElementById("loginPassword").value.trim();
@@ -617,16 +652,17 @@
     alertBox.classList.add("d-none");
 
     if (!usernameInput || !passwordInput) {
-      alertBox.innerText = "Vui lòng nhập đầy đủ tài khoản và mật khẩu!";
+      alertBox.innerText = "Vui lòng nhập đầy đủ Username và Password!";
       alertBox.classList.remove("d-none");
       return;
     }
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Xử lý...`;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang xác thực...`;
 
     fetch(API_URL, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: "login",
         username: usernameInput,
@@ -639,20 +675,18 @@
       btn.innerHTML = `<i class="fa-solid fa-key me-1"></i>Đăng Nhập`;
 
       if (data.status === "success") {
-        // Lưu phiên đăng nhập
         sessionStorage.setItem("user_role", data.role || "admin");
         sessionStorage.setItem("username", usernameInput);
 
-        // Đóng modal đăng nhập & cập nhật UI
         const modalElement = document.getElementById('modalLogin');
         const modal = bootstrap.Modal.getInstance(modalElement);
         if (modal) modal.hide();
+        
         document.getElementById("formLogin").reset();
-
         checkUserRoleUI();
-        alert("Đăng nhập thành công với quyền Quản trị!");
+        alert("Đăng nhập Admin thành công!");
       } else {
-        alertBox.innerText = data.message || "Tên đăng nhập hoặc mật khẩu không chính xác!";
+        alertBox.innerText = data.message || "Mật khẩu hoặc tài khoản sai!";
         alertBox.classList.remove("d-none");
       }
     })
@@ -660,16 +694,18 @@
       console.error(err);
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-key me-1"></i>Đăng Nhập`;
-      alertBox.innerText = "Lỗi kết nối máy chủ!";
+      alertBox.innerText = "Không thể kết nối đến máy chủ!";
       alertBox.classList.remove("d-none");
     });
   }
 
-  // HÀM ĐĂNG XUẤT
+  // ĐĂNG XUẤT
   function logout() {
-    if (confirm("Bạn có chắc chắn muốn đăng xuất tài khoản?")) {
+    if (confirm("Bạn có chắc chắn muốn thoát khỏi quyền Admin?")) {
       sessionStorage.clear();
       checkUserRoleUI();
+      switchTab('dashboard', document.querySelectorAll('.sidebar .nav-link')[0]);
+      alert("Đã quay về quyền Khách!");
     }
   }
 
@@ -690,10 +726,11 @@
     }
 
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang tạo...`;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...`;
 
     fetch(API_URL, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: "addUser",
         username: username,
@@ -707,13 +744,13 @@
       btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
 
       if (data.status === "success") {
-        alert("Tạo tài khoản mới thành công!");
+        alert("Thêm tài khoản mới thành công!");
         const modalElement = document.getElementById('modalAddUser');
         const modal = bootstrap.Modal.getInstance(modalElement);
         if (modal) modal.hide();
         document.getElementById("formAddUser").reset();
       } else {
-        alertBox.innerText = data.message || "Lỗi khi tạo tài khoản!";
+        alertBox.innerText = data.message || "Tạo tài khoản không thành công!";
         alertBox.classList.remove("d-none");
       }
     })
@@ -721,7 +758,7 @@
       console.error(err);
       btn.disabled = false;
       btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
-      alertBox.innerText = "Lỗi kết nối máy chủ!";
+      alertBox.innerText = "Lỗi mạng hoặc hệ thống!";
       alertBox.classList.remove("d-none");
     });
   }
@@ -736,13 +773,14 @@
     alertBox.classList.add("d-none");
 
     if (newPass !== confirmPass) {
-      alertBox.innerText = "Mật khẩu mới không khớp!";
+      alertBox.innerText = "Mật khẩu xác nhận không trùng khớp!";
       alertBox.classList.remove("d-none");
       return;
     }
 
     fetch(API_URL, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: "changePassword",
         oldPass: oldPass,
@@ -759,34 +797,18 @@
         if (modal) modal.hide();
         document.getElementById("formChangePassword").reset();
       } else {
-        alertBox.innerText = data.message || "Đổi mật khẩu thất bại!";
+        alertBox.innerText = data.message || "Mật khẩu cũ không chính xác!";
         alertBox.classList.remove("d-none");
       }
     })
     .catch(err => {
       console.error(err);
-      alertBox.innerText = "Lỗi hệ thống!";
+      alertBox.innerText = "Lỗi máy chủ!";
       alertBox.classList.remove("d-none");
     });
   }
 
-  // CHUYỂN TAB MENU
-  function switchTab(tabName, element) {
-    document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
-
-    var targetTab = document.getElementById('tab-' + tabName);
-    if(targetTab) targetTab.classList.add('active');
-    if(element) element.classList.add('active');
-
-    var sidebarMenu = document.getElementById('sidebarMenu');
-    var bsCollapse = bootstrap.Collapse.getInstance(sidebarMenu);
-    if (bsCollapse && window.innerWidth < 768) {
-      bsCollapse.hide();
-    }
-  }
-
-  // LOAD KPI DỮ LIỆU
+  // LOAD KPI THỐNG KÊ
   function loadDashboardKpi() {
     fetch(`${API_URL}?action=getDashboardKpi`)
       .then(res => res.json())
@@ -801,10 +823,10 @@
           document.getElementById("kpi-completed").innerText = String(kpi.completed || 0).padStart(2, '0');
         }
       })
-      .catch(err => console.error("Lỗi KPI:", err));
+      .catch(err => console.error("Lỗi tải KPI:", err));
   }
 
-  // LOAD DANH SÁCH TAI NẠN
+  // LOAD BẢNG TAI NẠN
   function loadAccidentList() {
     fetch(`${API_URL}?action=getAccidentList`)
       .then(res => res.json())
@@ -826,7 +848,7 @@
                 <td>${item.loai || ''}</td>
                 <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary" onclick="switchTab('accident')">
+                  <button class="btn btn-sm btn-outline-primary" onclick="switchTab('accident', document.querySelectorAll('.sidebar .nav-link')[1])">
                     <i class="fa-solid fa-eye me-1"></i>Chi tiết
                   </button>
                 </td>
@@ -843,11 +865,11 @@
       .catch(err => {
         console.error(err);
         document.getElementById("accident-table-body").innerHTML = 
-          `<tr><td colspan="7" class="text-center text-muted py-3">Không thể kết nối Google Sheet.</td></tr>`;
+          `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu từ Google Sheets.</td></tr>`;
       });
   }
 
-  // LỌC BẢNG TAI NẠN
+  // LỌC DỮ LIỆU TẠI TAB 2
   function filterAccidentTable() {
     const keyword = (document.getElementById("filterKeyword")?.value || "").toLowerCase().trim();
     const boPhan = document.getElementById("filterBoPhan")?.value || "";
@@ -869,7 +891,7 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy kết quả.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy kết quả phù hợp.</td></tr>`;
       return;
     }
 
@@ -896,7 +918,7 @@
     });
   }
 
-  // BÁO CÁO TAI NẠN MỚI
+  // GỬI BÁO CÁO TAI NẠN MỚI
   function submitAccidentForm() {
     const hoTen = document.getElementById("inputHoTen").value.trim();
     const maNV = document.getElementById("inputMaNV").value.trim();
@@ -907,7 +929,7 @@
     const btn = document.getElementById("btnSaveAccident");
 
     if (!hoTen || !maNV || !ngay) {
-      alert("Vui lòng nhập đủ các thông tin bắt buộc!");
+      alert("Vui lòng điền đầy đủ Tên, Mã NV và Thời gian!");
       return;
     }
 
@@ -916,6 +938,7 @@
 
     fetch(API_URL, {
       method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: "addAccident",
         nguoiBiNan: hoTen,
@@ -932,15 +955,16 @@
       btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
 
       if (data.status === "success") {
-        alert("Thêm vụ tai nạn thành công!");
+        alert("Báo cáo sự cố/tai nạn mới thành công!");
         const modalElement = document.getElementById('modalNewAccident');
         const modal = bootstrap.Modal.getInstance(modalElement);
         if (modal) modal.hide();
         document.getElementById("formNewAccident").reset();
+        
         loadDashboardKpi();
         loadAccidentList();
       } else {
-        alert(data.message || "Lỗi khi lưu báo cáo!");
+        alert(data.message || "Gửi thất bại!");
       }
     })
     .catch(err => {
