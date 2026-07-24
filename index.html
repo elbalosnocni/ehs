@@ -192,7 +192,57 @@
     </div>
   </div>
 </div>
-
+<!-- MODAL XEM CHI TIẾT TAI NẠN -->
+<div class="modal fade" id="modalDetailAccident" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="fa-solid fa-file-contract me-2"></i>Chi Tiết Hồ Sơ Tai Nạn</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label text-muted fw-bold mb-0">Mã Hồ Sơ:</label>
+            <div class="fs-5 text-primary fw-bold" id="detailMaHoSo">-</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted fw-bold mb-0">Thời Gian Xảy Ra:</label>
+            <div class="fw-bold" id="detailNgay">-</div>
+          </div>
+          <hr class="my-2">
+          <div class="col-md-6">
+            <label class="form-label text-muted fw-bold mb-0">Họ & Tên Nạn Nhân:</label>
+            <div class="fw-bold" id="detailHoTen">-</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-muted fw-bold mb-0">Mã Nhân Viên:</label>
+            <div class="fw-bold" id="detailMaNV">-</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted fw-bold mb-0">Bộ Phận / Xưởng:</label>
+            <div class="fw-bold" id="detailBoPhan">-</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted fw-bold mb-0">Loại Sự Cố:</label>
+            <div><span class="badge bg-info text-dark" id="detailLoai">-</span></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label text-muted fw-bold mb-0">Trạng Thái:</label>
+            <div><span class="badge bg-warning text-dark" id="detailTrangThai">-</span></div>
+          </div>
+          <div class="col-12">
+            <label class="form-label text-muted fw-bold mb-0">Mô Tả Diễn Biến Event:</label>
+            <div class="p-3 bg-light rounded border mt-1" id="detailMoTa" style="white-space: pre-line;">-</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
