@@ -15,7 +15,6 @@
     .kpi-card { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .kpi-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
     .kpi-value { font-size: 1.8rem; font-weight: 800; }
-    .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
     .tab-content-section { display: none; }
     .tab-content-section.active { display: block; }
   </style>
@@ -42,7 +41,7 @@
 
     <!-- Main Content -->
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
-      
+
       <!-- TAB 1: DASHBOARD -->
       <div id="tab-dashboard" class="tab-content-section active">
         <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
@@ -91,7 +90,6 @@
           </div>
         </div>
 
-        <!-- Bảng danh sách -->
         <div class="card shadow-sm mb-4">
           <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
             <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
@@ -120,14 +118,207 @@
         </div>
       </div>
 
-      <!-- TAB KHÁC (Mẫu hiển thị) -->
+      <!-- TAB 2: TAI NẠN -->
       <div id="tab-accident" class="tab-content-section">
-        <h4 class="mb-3">Quản lý Chi tiết Vụ việc Tai nạn</h4>
-        <p class="text-muted">Danh sách đầy đủ các vụ TNLĐ & công cụ lọc nâng cao...</p>
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+          <h4 class="mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Chi tiết Vụ việc Tai nạn</h4>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
+            <i class="fa-solid fa-plus me-1"></i> Thêm mới
+          </button>
+        </div>
+        <div class="card shadow-sm p-3 mb-3">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <input type="text" class="form-control form-control-sm" placeholder="Tìm theo tên, Mã NV hoặc Mã hồ sơ...">
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm">
+                <option value="">-- Tất cả Bộ phận --</option>
+                <option>Xưởng Cơ Khí</option>
+                <option>Xưởng 1</option>
+                <option>Kho NVL</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select form-select-sm">
+                <option value="">-- Tất cả Loại sự cố --</option>
+                <option>Lost Time</option>
+                <option>Medical Treatment</option>
+                <option>Near Miss</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-secondary btn-sm w-100"><i class="fa-solid fa-filter me-1"></i>Lọc</button>
+            </div>
+          </div>
+        </div>
+        <div class="card shadow-sm">
+          <div class="card-body p-0">
+            <table class="table table-striped align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã HS</th>
+                  <th>Thời gian</th>
+                  <th>Họ tên</th>
+                  <th>Mã NV</th>
+                  <th>Bộ phận</th>
+                  <th>Loại</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody id="accident-full-table">
+                <tr><td colspan="7" class="text-center text-muted py-3">Dữ liệu tổng hợp từ hệ thống...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+
+      <!-- TAB 3: ĐIỀU TRA -->
       <div id="tab-investigation" class="tab-content-section">
-        <h4 class="mb-3">Điều tra & Root Cause (5 Why / Fishbone)</h4>
-        <p class="text-muted">Giao diện phân tích nguyên nhân gốc rễ và CAPA...</p>
+        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>Điều tra & Root Cause (5 Why / Fishbone)</h4>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="card shadow-sm">
+              <div class="card-header bg-light fw-bold">Chọn Hồ sơ điều tra</div>
+              <div class="list-group list-group-flush" id="investigation-list">
+                <a href="#" class="list-group-item list-group-item-action active">TNLĐ-2026-0001 - LÝ THÀNH CÔNG</a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <div class="card shadow-sm p-3">
+              <h5 class="card-title text-primary">Phân tích nguyên nhân vụ việc: TNLĐ-2026-0001</h5>
+              <hr>
+              <form>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Nguyên nhân trực tiếp:</label>
+                  <textarea class="form-control" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
+                  <textarea class="form-control" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label fw-bold">Biện pháp khắc phục (CAPA):</label>
+                  <textarea class="form-control" rows="2" placeholder="Hành động khắc phục và hạn hoàn thành..."></textarea>
+                </div>
+                <button type="button" class="btn btn-success"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin điều tra</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: NGƯỜI LAO ĐỘNG -->
+      <div id="tab-employee" class="tab-content-section">
+        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+          <h4 class="mb-0"><i class="fa-solid fa-users text-primary me-2"></i>Danh sách Người lao động</h4>
+          <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-upload me-1"></i>Import Excel/Sheet</button>
+        </div>
+        <div class="card shadow-sm p-3 mb-3">
+          <input type="text" class="form-control" placeholder="Tìm kiếm nhanh nhân viên trong tổng số 3.000 người...">
+        </div>
+        <div class="card shadow-sm">
+          <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Mã NV</th>
+                  <th>Họ và Tên</th>
+                  <th>Bộ phận / Factory</th>
+                  <th>Chức danh</th>
+                  <th>Năm sinh</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>PR7300</td>
+                  <td>LÝ THÀNH CÔNG</td>
+                  <td>Xưởng Cơ Khí</td>
+                  <td>Công nhân vận hành</td>
+                  <td>1995</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: HỒ SƠ BHXH -->
+      <div id="tab-bhxh" class="tab-content-section">
+        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>Theo dõi Hồ sơ BHXH & Chế độ TNLĐ</h4>
+        <div class="card shadow-sm p-3">
+          <p class="text-muted mb-2">Trạng thái giải quyết chế độ Bảo hiểm xã hội cho các vụ tai nạn lao động.</p>
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Mã Hồ Sơ</th>
+                <th>Tên NLĐ</th>
+                <th>Ngày bị nạn</th>
+                <th>Số ngày nghỉ BHXH</th>
+                <th>Trạng thái nộp HS</th>
+                <th>Tiền trợ cấp dự kiến</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>TNLĐ-2026-0001</td>
+                <td>LÝ THÀNH CÔNG</td>
+                <td>12/06/2026</td>
+                <td>00 ngày</td>
+                <td><span class="badge bg-warning text-dark">Chờ hoàn thiện HS</span></td>
+                <td>0 VNĐ</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 6: CHI PHÍ -->
+      <div id="tab-cost" class="tab-content-section">
+        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>Quản lý Chi phí Tai nạn Lao động</h4>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold">Chi phí y tế / Sơ cứu:</span>
+              <span class="fs-4 text-danger fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold">Trợ cấp lương nghỉ việc:</span>
+              <span class="fs-4 text-warning fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card p-3 bg-light border-0">
+              <span class="text-muted fw-bold">Tổng chi phí thiệt hại:</span>
+              <span class="fs-4 text-dark fw-bold">0 VNĐ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: BÁO CÁO & WORD -->
+      <div id="tab-reports" class="tab-content-section">
+        <h4 class="mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>Báo cáo Thống kê & Báo cáo Word</h4>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+              <h5><i class="fa-solid fa-file-export me-2"></i>Xuất Biên bản Điều tra TNLĐ</h5>
+              <p class="text-muted">Tự động xuất file Word / PDF theo mẫu quy định nhà nước.</p>
+              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản Mẫu (Word)</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm p-3">
+              <h5><i class="fa-solid fa-chart-line me-2"></i>Báo cáo định kỳ Sở Lao Động</h5>
+              <p class="text-muted">Tổng hợp số liệu tai nạn 6 tháng và 1 năm.</p>
+              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Excel Báo cáo</button>
+            </div>
+          </div>
+        </div>
       </div>
 
     </main>
@@ -154,9 +345,9 @@
               <input type="text" id="inputMaNV" class="form-control" placeholder="Ví dụ: PR7300" required>
             </div>
             <div class="col-md-4">
-  <label class="form-label fw-bold">Thời gian xảy ra</label>
-  <input type="datetime-local" id="inputNgay" class="form-control" required>
-</div>
+              <label class="form-label fw-bold">Thời gian xảy ra</label>
+              <input type="datetime-local" id="inputNgay" class="form-control" required>
+            </div>
             <div class="col-md-4">
               <label class="form-label fw-bold">Bộ phận / Xưởng</label>
               <select id="selectBoPhan" class="form-select">
@@ -192,6 +383,7 @@
     </div>
   </div>
 </div>
+
 <!-- MODAL XEM CHI TIẾT TAI NẠN -->
 <div class="modal fade" id="modalDetailAccident" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -243,10 +435,12 @@
     </div>
   </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbymAHiBSm6d3P_qQbg_kEsUqSP4MP6QK-jTo6vZjWKmMBJC-j5sg1a32_dE0tkSdU_e/exec";
+  let accidentDataStore = [];
 
   document.addEventListener("DOMContentLoaded", function () {
     loadDashboardKpi();
@@ -257,10 +451,10 @@
   function switchTab(tabName, element) {
     document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
-    
+
     var targetTab = document.getElementById('tab-' + tabName);
     if(targetTab) targetTab.classList.add('active');
-    element.classList.add('active');
+    if(element) element.classList.add('active');
   }
 
   // Load KPI từ Sheet
@@ -281,122 +475,133 @@
       .catch(err => console.error("Lỗi KPI:", err));
   }
 
-  // Biến lưu trữ tạm thời danh sách tai nạn để hiển thị chi tiết
-let accidentDataStore = [];
+  // 1. Load Danh sách Tai nạn từ Sheet
+  function loadAccidentList() {
+    fetch(`${API_URL}?action=getAccidentList`)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById("accident-table-body");
+        const fullTbody = document.getElementById("accident-full-table");
 
-// 1. Load Danh sách Tai nạn từ Sheet
-function loadAccidentList() {
-  fetch(`${API_URL}?action=getAccidentList`)
-    .then(res => res.json())
-    .then(data => {
-      const tbody = document.getElementById("accident-table-body");
-      if (data.status === "success" && data.data.length > 0) {
-        accidentDataStore = data.data; // Lưu dữ liệu vào biến
-        tbody.innerHTML = "";
-        
-        data.data.forEach((item, index) => {
-          let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
-          
-          tbody.innerHTML += `
-            <tr>
-              <td><strong>${item.maHoSo}</strong></td>
-              <td>${item.ngay}</td>
-              <td>${item.nguoiBiNan}</td>
-              <td>${item.boPhan}</td>
-              <td>${item.loai}</td>
-              <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
-                  <i class="fa-solid fa-eye me-1"></i>Chi tiết
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-      } else {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("accident-table-body").innerHTML = 
-        `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu từ Google Sheet.</td></tr>`;
-    });
-}
+        if (data.status === "success" && data.data.length > 0) {
+          accidentDataStore = data.data; 
+          tbody.innerHTML = "";
+          if(fullTbody) fullTbody.innerHTML = "";
 
-// 2. Bấm nút xem Chi tiết
-function viewDetail(index) {
-  const item = accidentDataStore[index];
-  if (!item) return;
+          data.data.forEach((item, index) => {
+            let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
 
-  // Đổ dữ liệu vào Modal Chi Tiết
-  document.getElementById("detailMaHoSo").innerText = item.maHoSo || "-";
-  document.getElementById("detailNgay").innerText = item.ngay || "-";
-  document.getElementById("detailHoTen").innerText = item.nguoiBiNan || "-";
-  document.getElementById("detailMaNV").innerText = item.maNV || "N/A";
-  document.getElementById("detailBoPhan").innerText = item.boPhan || "-";
-  document.getElementById("detailLoai").innerText = item.loai || "-";
-  document.getElementById("detailTrangThai").innerText = item.trangThai || "Chưa điều tra";
-  document.getElementById("detailMoTa").innerText = item.moTa || "Không có mô tả chi tiết.";
+            let rowHtml = `
+              <tr>
+                <td><strong>${item.maHoSo}</strong></td>
+                <td>${item.ngay}</td>
+                <td>${item.nguoiBiNan}</td>
+                <td>${item.boPhan}</td>
+                <td>${item.loai}</td>
+                <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
+                    <i class="fa-solid fa-eye me-1"></i>Chi tiết
+                  </button>
+                </td>
+              </tr>
+            `;
+            tbody.innerHTML += rowHtml;
 
-  // Bật Modal
-  const modal = new bootstrap.Modal(document.getElementById('modalDetailAccident'));
-  modal.show();
-}
-function submitAccidentForm() {
-  const btn = document.getElementById("btnSaveAccident");
-  
-  // Thu thập dữ liệu từ Form
-  const payload = {
-    action: "addAccident",
-    hoTen: document.getElementById("inputHoTen").value.trim(),
-    maNV: document.getElementById("inputMaNV").value.trim(),
-    ngay: document.getElementById("inputNgay").value,
-    boPhan: document.getElementById("selectBoPhan").value,
-    loai: document.getElementById("selectLoai").value,
-    moTa: document.getElementById("inputMoTa").value.trim()
-  };
-
-  if (!payload.hoTen || !payload.ngay) {
-    alert("Vui lòng điền đầy đủ Họ tên và Ngày xảy ra!");
-    return;
+            if(fullTbody) {
+              fullTbody.innerHTML += `
+                <tr>
+                  <td><strong>${item.maHoSo}</strong></td>
+                  <td>${item.ngay}</td>
+                  <td>${item.nguoiBiNan}</td>
+                  <td>${item.maNV || 'N/A'}</td>
+                  <td>${item.boPhan}</td>
+                  <td>${item.loai}</td>
+                  <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
+                </tr>
+              `;
+            }
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById("accident-table-body").innerHTML = 
+          `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu từ Google Sheet.</td></tr>`;
+      });
   }
 
-  // Khóa nút để tránh bấm nhiều lần
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...`;
+  // 2. Bấm nút xem Chi tiết
+  function viewDetail(index) {
+    const item = accidentDataStore[index];
+    if (!item) return;
 
-  fetch(API_URL, {
-    method: "POST",
-    mode: "no-cors", // Bypass CORS cho Google Apps Script
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-  .then(() => {
-    alert("Đã lưu báo cáo thành công vào Google Sheet!");
-    
-    // Đóng Modal & Reset Form
-    const modalEl = document.getElementById('modalNewAccident');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-    document.getElementById("formNewAccident").reset();
+    document.getElementById("detailMaHoSo").innerText = item.maHoSo || "-";
+    document.getElementById("detailNgay").innerText = item.ngay || "-";
+    document.getElementById("detailHoTen").innerText = item.nguoiBiNan || "-";
+    document.getElementById("detailMaNV").innerText = item.maNV || "N/A";
+    document.getElementById("detailBoPhan").innerText = item.boPhan || "-";
+    document.getElementById("detailLoai").innerText = item.loai || "-";
+    document.getElementById("detailTrangThai").innerText = item.trangThai || "Chưa điều tra";
+    document.getElementById("detailMoTa").innerText = item.moTa || "Không có mô tả chi tiết.";
 
-    // Mở lại nút bấm & Tải lại dữ liệu Bảng
-    btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
-    
-    setTimeout(() => {
-      loadDashboardKpi();
-      loadAccidentList();
-    }, 1500);
-  })
-  .catch(err => {
-    console.error("Lỗi:", err);
-    alert("Có lỗi xảy ra khi lưu dữ liệu!");
-    btn.disabled = false;
-    btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
-  });
-}
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailAccident'));
+    modal.show();
+  }
+
+  // 3. Gửi Báo Cáo Tai Nạn Mới
+  function submitAccidentForm() {
+    const btn = document.getElementById("btnSaveAccident");
+
+    const payload = {
+      action: "addAccident",
+      hoTen: document.getElementById("inputHoTen").value.trim(),
+      maNV: document.getElementById("inputMaNV").value.trim(),
+      ngay: document.getElementById("inputNgay").value,
+      boPhan: document.getElementById("selectBoPhan").value,
+      loai: document.getElementById("selectLoai").value,
+      moTa: document.getElementById("inputMoTa").value.trim()
+    };
+
+    if (!payload.hoTen || !payload.ngay) {
+      alert("Vui lòng điền đầy đủ Họ tên và Ngày xảy ra!");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang lưu...`;
+
+    fetch(API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      alert("Đã lưu báo cáo thành công vào Google Sheet!");
+
+      const modalEl = document.getElementById('modalNewAccident');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+      document.getElementById("formNewAccident").reset();
+
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+
+      setTimeout(() => {
+        loadDashboardKpi();
+        loadAccidentList();
+      }, 1500);
+    })
+    .catch(err => {
+      console.error("Lỗi:", err);
+      alert("Có lỗi xảy ra khi lưu dữ liệu!");
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+    });
+  }
 </script>
 
 </body>
