@@ -281,37 +281,68 @@
       .catch(err => console.error("Lỗi KPI:", err));
   }
 
-  // Load Danh sách Tai nạn từ Sheet
-  function loadAccidentList() {
-    fetch(`${API_URL}?action=getAccidentList`)
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById("accident-table-body");
-        if (data.status === "success" && data.data.length > 0) {
-          tbody.innerHTML = "";
-          data.data.forEach(item => {
-            let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
-            tbody.innerHTML += `
-              <tr>
-                <td><strong>${item.maHoSo}</strong></td>
-                <td>${item.ngay}</td>
-                <td>${item.nguoiBiNan}</td>
-                <td>${item.boPhan}</td>
-                <td>${item.loai}</td>
-                <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
-                <td><button class="btn btn-sm btn-outline-primary">Chi tiết</button></td>
-              </tr>
-            `;
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
-        }
-      })
-      .catch(err => {
-        document.getElementById("accident-table-body").innerHTML = 
-          `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu trong Google Sheet.</td></tr>`;
-      });
-  }
+  // Biến lưu trữ tạm thời danh sách tai nạn để hiển thị chi tiết
+let accidentDataStore = [];
+
+// 1. Load Danh sách Tai nạn từ Sheet
+function loadAccidentList() {
+  fetch(`${API_URL}?action=getAccidentList`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("accident-table-body");
+      if (data.status === "success" && data.data.length > 0) {
+        accidentDataStore = data.data; // Lưu dữ liệu vào biến
+        tbody.innerHTML = "";
+        
+        data.data.forEach((item, index) => {
+          let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
+          
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${item.maHoSo}</strong></td>
+              <td>${item.ngay}</td>
+              <td>${item.nguoiBiNan}</td>
+              <td>${item.boPhan}</td>
+              <td>${item.loai}</td>
+              <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
+                  <i class="fa-solid fa-eye me-1"></i>Chi tiết
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("accident-table-body").innerHTML = 
+        `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu từ Google Sheet.</td></tr>`;
+    });
+}
+
+// 2. Bấm nút xem Chi tiết
+function viewDetail(index) {
+  const item = accidentDataStore[index];
+  if (!item) return;
+
+  // Đổ dữ liệu vào Modal Chi Tiết
+  document.getElementById("detailMaHoSo").innerText = item.maHoSo || "-";
+  document.getElementById("detailNgay").innerText = item.ngay || "-";
+  document.getElementById("detailHoTen").innerText = item.nguoiBiNan || "-";
+  document.getElementById("detailMaNV").innerText = item.maNV || "N/A";
+  document.getElementById("detailBoPhan").innerText = item.boPhan || "-";
+  document.getElementById("detailLoai").innerText = item.loai || "-";
+  document.getElementById("detailTrangThai").innerText = item.trangThai || "Chưa điều tra";
+  document.getElementById("detailMoTa").innerText = item.moTa || "Không có mô tả chi tiết.";
+
+  // Bật Modal
+  const modal = new bootstrap.Modal(document.getElementById('modalDetailAccident'));
+  modal.show();
+}
 function submitAccidentForm() {
   const btn = document.getElementById("btnSaveAccident");
   
