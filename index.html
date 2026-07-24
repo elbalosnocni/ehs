@@ -137,61 +137,70 @@
         </div>
       </div>
 
-      <!-- TAB 2: TAI NẠN -->
-      <div id="tab-accident" class="tab-content-section">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
-          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
-            <i class="fa-solid fa-plus me-1"></i> Thêm mới
-          </button>
-        </div>
-        <div class="card shadow-sm p-3 mb-3">
-          <div class="row g-2">
-            <div class="col-12 col-md-4">
-              <input type="text" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS...">
-            </div>
-            <div class="col-6 col-md-3">
-              <select class="form-select form-select-sm">
-                <option value="">-- Bộ phận --</option>
-                <option>Xưởng Cơ Khí</option>
-                <option>Xưởng 1</option>
-                <option>Kho NVL</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-3">
-              <select class="form-select form-select-sm">
-                <option value="">-- Sự cố --</option>
-                <option>Lost Time</option>
-                <option>Medical Treatment</option>
-                <option>Near Miss</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-2">
-              <button class="btn btn-secondary btn-sm w-100"><i class="fa-solid fa-filter me-1"></i>Lọc</button>
-            </div>
-          </div>
-        </div>
-        <div class="card shadow-sm">
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-striped align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã HS</th>
-                  <th>Thời gian</th>
-                  <th>Họ tên</th>
-                  <th>Mã NV</th>
-                  <th>Bộ phận</th>
-                  <th>Loại</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody id="accident-full-table">
-                <tr><td colspan="7" class="text-center text-muted py-3">Dữ liệu tổng hợp...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+     <!-- TAB 2: TAI NẠN -->
+<div id="tab-accident" class="tab-content-section">
+  <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+    <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
+      <i class="fa-solid fa-plus me-1"></i> Thêm mới
+    </button>
+  </div>
+  
+  <!-- KHU VỰC LỌC DỮ LIỆU (Đã đồng bộ bộ phận & gắn ID) -->
+  <div class="card shadow-sm p-3 mb-3">
+    <div class="row g-2">
+      <div class="col-12 col-md-4">
+        <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS..." oninput="filterAccidentTable()">
       </div>
+      <div class="col-6 col-md-3">
+        <select id="filterBoPhan" class="form-select form-select-sm" onchange="filterAccidentTable()">
+          <option value="">-- Bộ phận (Tất cả) --</option>
+          <option value="Xưởng Cơ Khí">Xưởng Cơ Khí</option>
+          <option value="Xưởng 1">Xưởng 1</option>
+          <option value="Xưởng 2">Xưởng 2</option>
+          <option value="Xưởng 3">Xưởng 3</option>
+          <option value="Xưởng 4">Xưởng 4</option>
+          <option value="Kho NVL">Kho NVL</option>
+        </select>
+      </div>
+      <div class="col-6 col-md-3">
+        <select id="filterLoai" class="form-select form-select-sm" onchange="filterAccidentTable()">
+          <option value="">-- Sự cố (Tất cả) --</option>
+          <option value="Lost Time">Lost Time</option>
+          <option value="Medical Treatment">Medical Treatment</option>
+          <option value="Near Miss">Near Miss</option>
+        </select>
+      </div>
+      <div class="col-12 col-md-2">
+        <button class="btn btn-secondary btn-sm w-100" onclick="filterAccidentTable()">
+          <i class="fa-solid fa-filter me-1"></i>Lọc
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0 table-responsive-mobile">
+      <table class="table table-striped align-middle mb-0 text-nowrap">
+        <thead class="table-light">
+          <tr>
+            <th>Mã HS</th>
+            <th>Thời gian</th>
+            <th>Họ tên</th>
+            <th>Mã NV</th>
+            <th>Bộ phận</th>
+            <th>Loại</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody id="accident-full-table">
+          <tr><td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
       <!-- TAB 3: ĐIỀU TRA -->
       <div id="tab-investigation" class="tab-content-section">
@@ -501,62 +510,55 @@
   }
 
   // 1. Load Danh sách Tai nạn từ Sheet
-  function loadAccidentList() {
-    fetch(`${API_URL}?action=getAccidentList`)
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.getElementById("accident-table-body");
-        const fullTbody = document.getElementById("accident-full-table");
+  // 1. Load Danh sách Tai nạn từ Sheet
+function loadAccidentList() {
+  fetch(`${API_URL}?action=getAccidentList`)
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.getElementById("accident-table-body");
 
-        if (data.status === "success" && data.data.length > 0) {
-          accidentDataStore = data.data; 
-          tbody.innerHTML = "";
-          if(fullTbody) fullTbody.innerHTML = "";
+      if (data.status === "success" && data.data.length > 0) {
+        accidentDataStore = data.data; 
+        tbody.innerHTML = "";
 
-          data.data.forEach((item, index) => {
-            let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
+        // Render cho bảng ở Tab Dashboard
+        data.data.forEach((item, index) => {
+          let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
 
-            let rowHtml = `
-              <tr>
-                <td><strong>${item.maHoSo}</strong></td>
-                <td>${item.ngay}</td>
-                <td>${item.nguoiBiNan}</td>
-                <td>${item.boPhan}</td>
-                <td>${item.loai}</td>
-                <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
-                <td>
-                  <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
-                    <i class="fa-solid fa-eye me-1"></i>Chi tiết
-                  </button>
-                </td>
-              </tr>
-            `;
-            tbody.innerHTML += rowHtml;
+          let rowHtml = `
+            <tr>
+              <td><strong>${item.maHoSo}</strong></td>
+              <td>${item.ngay}</td>
+              <td>${item.nguoiBiNan}</td>
+              <td>${item.boPhan}</td>
+              <td>${item.loai}</td>
+              <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${index})">
+                  <i class="fa-solid fa-eye me-1"></i>Chi tiết
+                </button>
+              </td>
+            </tr>
+          `;
+          tbody.innerHTML += rowHtml;
+        });
 
-            if(fullTbody) {
-              fullTbody.innerHTML += `
-                <tr>
-                  <td><strong>${item.maHoSo}</strong></td>
-                  <td>${item.ngay}</td>
-                  <td>${item.nguoiBiNan}</td>
-                  <td>${item.maNV || 'N/A'}</td>
-                  <td>${item.boPhan}</td>
-                  <td>${item.loai}</td>
-                  <td><span class="badge ${badgeClass}">${item.trangThai}</span></td>
-                </tr>
-              `;
-            }
-          });
-        } else {
-          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("accident-table-body").innerHTML = 
-          `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu từ Google Sheet.</td></tr>`;
-      });
-  }
+        // TỰ ĐỘNG LỌC VÀ RENDER CHO TAB TAI NẠN NGAY SAU KHI TẢI DỮ LIỆU
+        filterAccidentTable();
+
+      } else {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn nào được ghi nhận.</td></tr>`;
+        document.getElementById("accident-full-table").innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu.</td></tr>`;
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      document.getElementById("accident-table-body").innerHTML = 
+        `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu từ Google Sheet.</td></tr>`;
+      document.getElementById("accident-full-table").innerHTML = 
+        `<tr><td colspan="7" class="text-center text-muted py-3">Không thể tải dữ liệu.</td></tr>`;
+    });
+}
 
   // 2. Bấm nút xem Chi tiết
   function viewDetail(index) {
@@ -627,6 +629,58 @@
       btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
     });
   }
+  // Hàm xử lý Lọc dữ liệu trong Tab Tai Nạn
+// Hàm xử lý Lọc dữ liệu trong Tab Tai Nạn
+function filterAccidentTable() {
+  const keyword = document.getElementById("filterKeyword").value.toLowerCase().trim();
+  const selectedBoPhan = document.getElementById("filterBoPhan").value;
+  const selectedLoai = document.getElementById("filterLoai").value;
+
+  const fullTbody = document.getElementById("accident-full-table");
+  if (!fullTbody) return;
+
+  // Lọc dữ liệu từ mảng gốc accidentDataStore
+  const filteredData = accidentDataStore.filter(item => {
+    const maHoSo = (item.maHoSo || "").toLowerCase();
+    const nguoiBiNan = (item.nguoiBiNan || "").toLowerCase();
+    const maNV = (item.maNV || "").toLowerCase();
+    
+    const matchKeyword = !keyword || maHoSo.includes(keyword) || nguoiBiNan.includes(keyword) || maNV.includes(keyword);
+    const matchBoPhan = !selectedBoPhan || item.boPhan === selectedBoPhan;
+    const matchLoai = !selectedLoai || item.loai === selectedLoai;
+
+    return matchKeyword && matchBoPhan && matchLoai;
+  });
+
+  // Render lại bảng sau khi lọc
+  if (filteredData.length > 0) {
+    fullTbody.innerHTML = "";
+    filteredData.forEach(item => {
+      // Tìm index gốc trong accidentDataStore để mở Modal Chi Tiết chuẩn xác
+      const originalIndex = accidentDataStore.findIndex(x => x.maHoSo === item.maHoSo);
+      let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
+      
+      fullTbody.innerHTML += `
+        <tr>
+          <td><strong>${item.maHoSo}</strong></td>
+          <td>${item.ngay}</td>
+          <td>${item.nguoiBiNan}</td>
+          <td>${item.maNV || 'N/A'}</td>
+          <td>${item.boPhan}</td>
+          <td>${item.loai}</td>
+          <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${originalIndex})">
+              <i class="fa-solid fa-eye me-1"></i>Chi tiết
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  } else {
+    fullTbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy kết quả phù hợp.</td></tr>`;
+  }
+}
 </script>
 
 </body>
