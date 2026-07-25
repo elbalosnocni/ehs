@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TNLĐ MANAGER 2026 - EHS Dashboard</title>
-  <!-- Bootstrap 5 & FontAwesome -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -12,18 +11,14 @@
     .sidebar { min-height: 100vh; background-color: #0f172a; color: #fff; }
     .sidebar .nav-link { color: #94a3b8; padding: 12px 20px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .sidebar .nav-link.active, .sidebar .nav-link:hover { color: #fff; background-color: #0284c7; }
-    .sidebar .nav-link.disabled-tab { opacity: 0.5; cursor: not-allowed; }
+    .sidebar .nav-link.disabled-tab { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
     .kpi-card { border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
     .kpi-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
     .kpi-value { font-size: 1.5rem; font-weight: 800; }
     .tab-content-section { display: none; }
     .tab-content-section.active { display: block; }
-    .admin-only { display: none !important; } /* Mặc định ẩn nút dành cho Admin */
-    
-    @media (max-width: 767.98px) {
-      .sidebar { min-height: auto; }
-      .table-responsive-mobile { display: block; width: 100%; overflow-x: auto; }
-    }
+    .admin-only { display: none !important; }
+    @media (max-width: 767.98px) { .sidebar { min-height: auto; } }
   </style>
 </head>
 <body>
@@ -33,101 +28,57 @@
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header bg-dark text-white py-2">
-        <h5 class="modal-title fs-6"><i class="fa-solid fa-right-to-bracket me-2"></i>Đăng Nhập Quản Trị</h5>
+        <h5 class="modal-title fs-6"><i class="fa-solid fa-right-to-bracket me-2"></i>Đăng Nhập</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="formLogin" onsubmit="event.preventDefault(); submitLogin();">
           <div class="mb-3">
             <label class="form-label fw-bold small">Tên đăng nhập</label>
-            <input type="text" class="form-control form-control-sm" id="loginUsername" placeholder="Nhập Username" required>
+            <input type="text" class="form-control form-control-sm" id="loginUsername" required>
           </div>
           <div class="mb-3">
             <label class="form-label fw-bold small">Mật khẩu</label>
-            <input type="password" class="form-control form-control-sm" id="loginPassword" placeholder="Nhập Password" required>
+            <input type="password" class="form-control form-control-sm" id="loginPassword" required>
           </div>
-          <div id="loginAlert" class="alert alert-danger d-none py-1 small" role="alert"></div>
-          <button type="submit" class="btn btn-primary btn-sm w-100" id="btnLoginSubmit">
-            <i class="fa-solid fa-key me-1"></i>Đăng Nhập
-          </button>
+          <div id="loginAlert" class="alert alert-danger d-none py-1 small"></div>
+          <button type="submit" class="btn btn-primary btn-sm w-100" id="btnLoginSubmit">Đăng Nhập</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL THÊM USER MỚI (Admin) -->
-<div class="modal fade" id="modalAddUser" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+<!-- MODAL PHÂN QUYỀN TABS (DÀNH CHO ADMIN) -->
+<div class="modal fade" id="modalManagePermissions" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title fs-6"><i class="fa-solid fa-user-plus me-2"></i>Thêm Tài Khoản Mới</h5>
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title fs-6"><i class="fa-solid fa-user-gear me-2"></i>Quản Lý Phân Quyền Truy Cập Tab (1-7)</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="formAddUser">
-          <div class="mb-3">
-            <label class="form-label fw-bold small">Tên đăng nhập / Email</label>
-            <input type="text" class="form-control" id="newUsernameInput" placeholder="Ví dụ: admin02" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold small">Mật khẩu</label>
-            <input type="password" class="form-control" id="newUserPassInput" placeholder="Nhập mật khẩu" required minlength="6">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-bold small">Phân quyền (Role)</label>
-            <select class="form-select" id="newUserRoleSelect">
-              <option value="user">User (Chỉ xem/báo cáo)</option>
-              <option value="admin">Admin (Toàn quyền)</option>
-            </select>
-          </div>
-          <div id="addUserAlert" class="alert alert-danger d-none" role="alert"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-success btn-sm" id="btnSubmitAddUser" onclick="submitAddUser()">
-          <i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản
-        </button>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle small mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Quyền truy cập Tab (1 - 7)</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="userPermissionTableBody">
+              <tr><td colspan="4" class="text-center">Đang tải danh sách user...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL ĐỔI MẬT KHẨU -->
-<div class="modal fade" id="modalChangePassword" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title fs-6"><i class="fa-solid fa-key me-2"></i>Đổi Mật Khẩu</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formChangePassword">
-          <div class="mb-3">
-            <label class="form-label">Mật khẩu hiện tại</label>
-            <input type="password" class="form-control" id="oldPassInput" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Mật khẩu mới</label>
-            <input type="password" class="form-control" id="newPassInput" required minlength="6">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Xác nhận mật khẩu mới</label>
-            <input type="password" class="form-control" id="confirmPassInput" required>
-          </div>
-          <div id="changePassAlert" class="alert alert-danger d-none" role="alert"></div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-primary btn-sm" onclick="submitChangePassword()">Cập nhật</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL BÁO CÁO VỤ TAI NẠN MỚI -->
+<!-- MODAL BÁO CÁO MỚI -->
 <div class="modal fade" id="modalNewAccident" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -140,111 +91,79 @@
           <div class="row g-3">
             <div class="col-12 col-md-6">
               <label class="form-label fw-bold small">Họ & Tên Nạn Nhân</label>
-              <input type="text" id="inputHoTen" class="form-control" placeholder="Nhập tên công nhân" required>
+              <input type="text" id="inputHoTen" class="form-control" required>
             </div>
             <div class="col-12 col-md-6">
               <label class="form-label fw-bold small">Mã Nhân Viên</label>
-              <input type="text" id="inputMaNV" class="form-control" placeholder="Ví dụ: PR7300" required>
+              <input type="text" id="inputMaNV" class="form-control" required>
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label fw-bold small">Thời gian xảy ra</label>
               <input type="datetime-local" id="inputNgay" class="form-control" required>
             </div>
+            <!-- DỮ LIỆU SELECT ĐƯỢC LOAD DỘNG TỪ MASTER DATA -->
             <div class="col-6 col-md-4">
               <label class="form-label fw-bold small">Bộ phận / Xưởng</label>
-              <select id="selectBoPhan" class="form-select">
-                <option>Xưởng Cơ Khí</option>
-                <option>Xưởng 1</option>
-                <option>Xưởng 2</option>
-                <option>Kho NVL</option>
-              </select>
+              <select id="selectBoPhan" class="form-select"></select>
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label fw-bold small">Loại Sự Cố</label>
-              <select id="selectLoai" class="form-select">
-                <option value="Lost Time">Lost Time (Mất ngày công)</option>
-                <option value="Medical Treatment">Medical Treatment (Sơ y tế)</option>
-                <option value="Near Miss">Near Miss (Suýt nguy)</option>
-              </select>
+              <select id="selectLoai" class="form-select"></select>
             </div>
             <div class="col-12">
               <label class="form-label fw-bold small">Mô tả ngắn diễn biến</label>
-              <textarea id="inputMoTa" class="form-control" rows="3" placeholder="Mô tả chi tiết vị trí và diễn biến sự cố..."></textarea>
+              <textarea id="inputMoTa" class="form-control" rows="3"></textarea>
             </div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-success btn-sm" id="btnSaveAccident" onclick="submitAccidentForm()">
-          <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo
-        </button>
+        <button type="button" class="btn btn-success btn-sm" onclick="submitAccidentForm()">Lưu Báo Cáo</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- NAVBAR MOBILE -->
-<nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand fw-bold fs-6" href="#"><i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-  </div>
-</nav>
-
+<!-- MAIN LAYOUT -->
 <div class="container-fluid">
   <div class="row">
-    <!-- SIDEBAR MENU -->
+    <!-- SIDEBAR -->
     <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse p-0">
-      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary d-none d-md-block">
+      <div class="p-3 fs-5 fw-bold text-white border-bottom border-secondary">
         <i class="fa-solid fa-shield-halved text-info me-2"></i>TNLĐ MANAGER
       </div>
-      <ul class="nav flex-column mt-md-3">
-        <!-- TAB 1 & 2 Dành cho Guest & Admin -->
-        <li class="nav-item"><a class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i>1. Dashboard</a></li>
-        <li class="nav-item"><a class="nav-link" onclick="switchTab('accident', this)"><i class="fa-solid fa-triangle-exclamation me-2"></i>2. Báo cáo Tai nạn</a></li>
-        
-        <!-- TAB 3 -> 7 Yêu cầu quyền Admin -->
-        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('investigation', this)"><i class="fa-solid fa-magnifying-glass me-2"></i>3. Điều tra <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
-        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('employee', this)"><i class="fa-solid fa-users me-2"></i>4. Người lao động <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
-        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('bhxh', this)"><i class="fa-solid fa-file-medical me-2"></i>5. Hồ sơ BHXH <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
-        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('cost', this)"><i class="fa-solid fa-sack-dollar me-2"></i>6. Chi phí <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
-        <li class="nav-item"><a class="nav-link disabled-tab" onclick="switchTab('reports', this)"><i class="fa-solid fa-file-word me-2"></i>7. Báo cáo & Word <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+      <ul class="nav flex-column mt-3" id="sidebarNavList">
+        <li class="nav-item"><a class="nav-link active" data-tab="1" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i>1. Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" data-tab="2" onclick="switchTab('accident', this)"><i class="fa-solid fa-triangle-exclamation me-2"></i>2. Báo cáo Tai nạn</a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" data-tab="3" onclick="switchTab('investigation', this)"><i class="fa-solid fa-magnifying-glass me-2"></i>3. Điều tra <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" data-tab="4" onclick="switchTab('employee', this)"><i class="fa-solid fa-users me-2"></i>4. Người lao động <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" data-tab="5" onclick="switchTab('bhxh', this)"><i class="fa-solid fa-file-medical me-2"></i>5. Hồ sơ BHXH <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" data-tab="6" onclick="switchTab('cost', this)"><i class="fa-solid fa-sack-dollar me-2"></i>6. Chi phí <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
+        <li class="nav-item"><a class="nav-link disabled-tab" data-tab="7" onclick="switchTab('reports', this)"><i class="fa-solid fa-file-word me-2"></i>7. Báo cáo & Word <i class="fa-solid fa-lock text-warning ms-1 small-lock"></i></a></li>
       </ul>
     </nav>
 
-    <!-- MAIN CONTENT -->
+    <!-- CONTENT -->
     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-3">
-
-      <!-- HEADER CONTAINER & LOGIN STATUS -->
       <div class="d-flex flex-wrap justify-content-between align-items-center pb-2 mb-3 border-bottom gap-2">
         <h1 class="h5 font-weight-bold mb-0">HỆ THỐNG QUẢN LÝ TNLĐ 2026</h1>
         
         <div class="d-flex align-items-center gap-2">
-          <!-- Nút Đăng nhập cho Guest -->
           <button id="btnOpenLogin" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalLogin">
-            <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng Nhập Admin
+            <i class="fa-solid fa-right-to-bracket me-1"></i>Đăng Nhập
           </button>
 
-          <!-- Thanh điều khiển khi là Admin -->
           <div id="adminControls" class="d-none align-items-center gap-2">
-            <span class="badge bg-success small" id="currentUserBadge"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>
+            <span class="badge bg-success small" id="currentUserBadge"></span>
             
-            <button class="btn btn-sm btn-outline-success admin-only" data-bs-toggle="modal" data-bs-target="#modalAddUser">
-              <i class="fa-solid fa-user-plus me-1"></i>Thêm User
+            <button class="btn btn-sm btn-outline-dark admin-only" data-bs-toggle="modal" data-bs-target="#modalManagePermissions" onclick="loadUserPermissions()">
+              <i class="fa-solid fa-user-gear me-1"></i>Phân Quyền User
             </button> 
-            <button class="btn btn-sm btn-outline-secondary admin-only" data-bs-toggle="modal" data-bs-target="#modalChangePassword">
-              <i class="fa-solid fa-lock me-1"></i>Đổi MK
-            </button>
 
-            <button class="btn btn-sm btn-danger" onclick="logout()">
-              <i class="fa-solid fa-power-off me-1"></i>Thoát
-            </button>
+            <button class="btn btn-sm btn-danger" onclick="logout()">Thoát</button>
           </div>
 
-          <!-- NÚT BÁO CÁO MỚI (CHỈ XUẤT HIỆN KHI LÀ ADMIN) -->
           <button class="btn btn-primary btn-sm admin-only" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
             <i class="fa-solid fa-plus me-1"></i> Báo cáo mới
           </button>
@@ -254,725 +173,224 @@
       <!-- TAB 1: DASHBOARD -->
       <div id="tab-dashboard" class="tab-content-section active">
         <div class="row g-2 mb-4">
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-primary border-4">
-              <div class="kpi-title">Tổng NLĐ</div>
-              <div class="kpi-value text-primary" id="kpi-total-emp">0</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-danger border-4">
-              <div class="kpi-title">Tai nạn năm</div>
-              <div class="kpi-value text-danger" id="kpi-accidents">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-warning border-4">
-              <div class="kpi-title">Lost Time</div>
-              <div class="kpi-value text-warning" id="kpi-lost-time">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-info border-4">
-              <div class="kpi-title">Near Miss</div>
-              <div class="kpi-value text-info" id="kpi-near-miss">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-secondary border-4">
-              <div class="kpi-title">Đang xử lý</div>
-              <div class="kpi-value text-secondary" id="kpi-pending">00</div>
-            </div>
-          </div>
-          <div class="col-6 col-md-2">
-            <div class="card kpi-card p-2 p-md-3 border-start border-success border-4">
-              <div class="kpi-title">Đã hoàn tất</div>
-              <div class="kpi-value text-success" id="kpi-completed">00</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card shadow-sm mb-4">
-          <div class="card-header bg-white font-weight-bold d-flex flex-wrap justify-content-between align-items-center gap-1">
-            <span><i class="fa-solid fa-list me-2"></i>Danh sách Tai nạn gần đây</span>
-            <span class="badge bg-light text-dark small">🔴 Chưa điều tra | 🟡 Chờ BHXH | 🟢 Hoàn tất</span>
-          </div>
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-hover align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã Hồ Sơ</th>
-                  <th>Ngày</th>
-                  <th>Người bị nạn</th>
-                  <th>Bộ phận</th>
-                  <th>Loại</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody id="accident-table-body">
-                <tr><td colspan="7" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
-              </tbody>
-            </table>
-          </div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-primary border-4"><div class="kpi-title">Tổng NLĐ</div><div class="kpi-value text-primary" id="kpi-total-emp">0</div></div></div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-danger border-4"><div class="kpi-title">Tai nạn năm</div><div class="kpi-value text-danger" id="kpi-accidents">00</div></div></div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-warning border-4"><div class="kpi-title">Lost Time</div><div class="kpi-value text-warning" id="kpi-lost-time">00</div></div></div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-info border-4"><div class="kpi-title">Near Miss</div><div class="kpi-value text-info" id="kpi-near-miss">00</div></div></div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-secondary border-4"><div class="kpi-title">Đang xử lý</div><div class="kpi-value text-secondary" id="kpi-pending">00</div></div></div>
+          <div class="col-6 col-md-2"><div class="card kpi-card p-2 border-start border-success border-4"><div class="kpi-title">Đã hoàn tất</div><div class="kpi-value text-success" id="kpi-completed">00</div></div></div>
         </div>
       </div>
 
-      <!-- TAB 2: QUẢN LÝ TAI NẠN -->
+      <!-- TAB 2: TAI NẠN -->
       <div id="tab-accident" class="tab-content-section">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>Quản lý Tai nạn</h4>
-          <button class="btn btn-primary btn-sm admin-only" data-bs-toggle="modal" data-bs-target="#modalNewAccident">
-            <i class="fa-solid fa-plus me-1"></i> Thêm mới
-          </button>
-        </div>
-        
         <div class="card shadow-sm p-3 mb-3">
           <div class="row g-2">
             <div class="col-12 col-md-4">
-              <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV, Mã HS..." oninput="filterAccidentTable()">
+              <input type="text" id="filterKeyword" class="form-control form-control-sm" placeholder="Tìm tên, Mã NV..." oninput="filterAccidentTable()">
+            </div>
+            <!-- DỮ LIỆU BỘ PHẬN & LOẠI SỰ CỐ DỘNG -->
+            <div class="col-6 col-md-3">
+              <select id="filterBoPhan" class="form-select form-select-sm" onchange="filterAccidentTable()"></select>
             </div>
             <div class="col-6 col-md-3">
-              <select id="filterBoPhan" class="form-select form-select-sm" onchange="filterAccidentTable()">
-                <option value="">-- Bộ phận (Tất cả) --</option>
-                <option value="Xưởng Cơ Khí">Xưởng Cơ Khí</option>
-                <option value="Xưởng 1">Xưởng 1</option>
-                <option value="Xưởng 2">Xưởng 2</option>
-                <option value="Kho NVL">Kho NVL</option>
-              </select>
-            </div>
-            <div class="col-6 col-md-3">
-              <select id="filterLoai" class="form-select form-select-sm" onchange="filterAccidentTable()">
-                <option value="">-- Sự cố (Tất cả) --</option>
-                <option value="Lost Time">Lost Time</option>
-                <option value="Medical Treatment">Medical Treatment</option>
-                <option value="Near Miss">Near Miss</option>
-              </select>
-            </div>
-            <div class="col-12 col-md-2">
-              <button class="btn btn-secondary btn-sm w-100" onclick="filterAccidentTable()">
-                <i class="fa-solid fa-filter me-1"></i>Lọc
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card shadow-sm">
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-striped align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã HS</th>
-                  <th>Thời gian</th>
-                  <th>Họ tên</th>
-                  <th>Mã NV</th>
-                  <th>Bộ phận</th>
-                  <th>Loại</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
-                </tr>
-              </thead>
-              <tbody id="accident-full-table">
-                <tr><td colspan="8" class="text-center text-muted py-3">Đang tải dữ liệu...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 3: ĐIỀU TRA -->
-      <div id="tab-investigation" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-magnifying-glass text-info me-2"></i>3. Điều tra & Root Cause (5 Why)</h4>
-        
-        <div id="lockInvestigationAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
-          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Khu vực hạn chế truy cập</h5>
-          <p class="mb-0 small">Vui lòng **Đăng Nhập Admin** để mở khóa cấu hình Root Cause 5-Why.</p>
-        </div>
-
-        <div id="investigationContent" class="row g-3 d-none">
-          <div class="col-12 col-md-4">
-            <div class="card shadow-sm">
-              <div class="card-header bg-light fw-bold small">Chọn Hồ sơ điều tra</div>
-              <div class="list-group list-group-flush small" id="investigation-list">
-                <a href="#" class="list-group-item list-group-item-action active">TNLĐ-2026-0001 - LÝ THÀNH CÔNG</a>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-md-8">
-            <div class="card shadow-sm p-3">
-              <h6 class="card-title text-primary fw-bold">Phân tích nguyên nhân: TNLĐ-2026-0001</h6>
-              <hr class="my-2">
-              <form>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Nguyên nhân trực tiếp:</label>
-                  <textarea class="form-control form-control-sm" rows="2" placeholder="Nhập nguyên nhân trực tiếp..."></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Phân tích 5-Why (Nguyên nhân gốc rễ):</label>
-                  <textarea class="form-control form-control-sm" rows="3" placeholder="Why 1 -> Why 2 -> Why 3..."></textarea>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label fw-bold small">Biện pháp khắc phục (CAPA):</label>
-                  <textarea class="form-control form-control-sm" rows="2" placeholder="Hành động khắc phục..."></textarea>
-                </div>
-                <button type="button" class="btn btn-success btn-sm"><i class="fa-solid fa-floppy-disk me-1"></i>Lưu thông tin</button>
-              </form>
+              <select id="filterLoai" class="form-select form-select-sm" onchange="filterAccidentTable()"></select>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- TAB 4: NGƯỜI LAO ĐỘNG -->
-      <div id="tab-employee" class="tab-content-section">
-        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-          <h4 class="h6 fw-bold mb-0"><i class="fa-solid fa-users text-primary me-2"></i>4. Người lao động</h4>
-          <button class="btn btn-outline-primary btn-sm admin-only"><i class="fa-solid fa-upload me-1"></i>Import Dữ Liệu</button>
-        </div>
-        <div class="card shadow-sm p-2 mb-3">
-          <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm nhân viên trong danh sách...">
-        </div>
-        <div class="card shadow-sm">
-          <div class="card-body p-0 table-responsive-mobile">
-            <table class="table table-hover align-middle mb-0 text-nowrap">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã NV</th>
-                  <th>Họ và Tên</th>
-                  <th>Bộ phận</th>
-                  <th>Chức danh</th>
-                  <th>Năm sinh</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>PR7300</td>
-                  <td>LÝ THÀNH CÔNG</td>
-                  <td>Xưởng Cơ Khí</td>
-                  <td>Công nhân vận hành</td>
-                  <td>1995</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 5: HỒ SƠ BHXH -->
-      <div id="tab-bhxh" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-medical text-danger me-2"></i>5. Hồ sơ BHXH</h4>
-        <div class="card shadow-sm p-3">
-          <div class="table-responsive-mobile">
-            <table class="table table-bordered align-middle text-nowrap mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th>Mã HS</th>
-                  <th>Tên NLĐ</th>
-                  <th>Ngày bị nạn</th>
-                  <th>Số ngày nghỉ</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>TNLĐ-2026-0001</td>
-                  <td>LÝ THÀNH CÔNG</td>
-                  <td>12/06/2026</td>
-                  <td>00 ngày</td>
-                  <td><span class="badge bg-warning text-dark">Chờ hoàn thiện</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 6: CHI PHÍ -->
-      <div id="tab-cost" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-sack-dollar text-success me-2"></i>6. Chi phí TNLĐ</h4>
-        
-        <div id="lockCostAlert" class="alert alert-warning border-start border-warning border-4 shadow-sm" role="alert">
-          <h5 class="alert-heading fs-6 fw-bold"><i class="fa-solid fa-lock me-2"></i>Dữ liệu Chi Phí Bảo Mật</h5>
-          <p class="mb-0 small">Chỉ Ban Giám Đốc/Admin EHS mới có quyền xem thông tin chi phí y tế và trợ cấp lương.</p>
-        </div>
-
-        <div id="costContent" class="row g-2 mb-3 d-none">
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Chi phí y tế:</span>
-              <span class="fs-5 text-danger fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Trợ cấp lương:</span>
-              <span class="fs-5 text-warning fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="card p-3 bg-light border-0">
-              <span class="text-muted fw-bold small">Tổng chi phí:</span>
-              <span class="fs-5 text-dark fw-bold">0 VNĐ</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 7: BÁO CÁO & WORD -->
-      <div id="tab-reports" class="tab-content-section">
-        <h4 class="h6 fw-bold mb-3 border-bottom pb-2"><i class="fa-solid fa-file-word text-primary me-2"></i>7. Báo cáo Thống kê & Word</h4>
-        <div class="row g-3">
-          <div class="col-12 col-md-6">
-            <div class="card shadow-sm p-3">
-              <h6 class="fw-bold"><i class="fa-solid fa-file-export me-2"></i>Biên bản Điều tra TNLĐ</h6>
-              <p class="text-muted small">Xuất file Word theo mẫu quy định.</p>
-              <button class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-download me-1"></i> Tải Biên bản (Word)</button>
-            </div>
-          </div>
-          <div class="col-12 col-md-6">
-            <div class="card shadow-sm p-3">
-              <h6 class="fw-bold"><i class="fa-solid fa-chart-line me-2"></i>Báo cáo Sở Lao Động</h6>
-              <p class="text-muted small">Báo cáo định kỳ 6 tháng & 1 năm.</p>
-              <button class="btn btn-outline-success btn-sm"><i class="fa-solid fa-file-excel me-1"></i> Xuất Báo cáo Excel</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- TABS 3 -> 7 -->
+      <div id="tab-investigation" class="tab-content-section"><h4>3. Điều tra Root Cause</h4></div>
+      <div id="tab-employee" class="tab-content-section"><h4>4. Danh sách Người Lao Động</h4></div>
+      <div id="tab-bhxh" class="tab-content-section"><h4>5. Hồ sơ BHXH</h4></div>
+      <div id="tab-cost" class="tab-content-section"><h4>6. Quản lý Chi phí</h4></div>
+      <div id="tab-reports" class="tab-content-section"><h4>7. Báo cáo & Xuất File Word</h4></div>
 
     </main>
   </div>
 </div>
 
-<!-- JAVASCRIPT PHÂN QUYỀN VÀ XỬ LÝ DỮ LIỆU -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
   const API_URL = "https://script.google.com/macros/s/AKfycbymAHiBSm6d3P_qQbg_kEsUqSP4MP6QK-jTo6vZjWKmMBJC-j5sg1a32_dE0tkSdU_e/exec";
-  let accidentDataStore = [];
+  let masterDataStore = { boPhan: [], loaiSuCo: [] };
 
   document.addEventListener("DOMContentLoaded", function () {
-    checkUserRoleUI(); 
-    loadDashboardKpi();
-    loadAccidentList();
+    loadMasterData();
+    checkUserRoleUI();
   });
 
-  // HÀM KIỂM TRA QUYỀN VÀ CẬP NHẬT TRẠNG THÁI GIAO DIỆN KHÓA/MỞ
-  function checkUserRoleUI() {
-    const role = sessionStorage.getItem("user_role") || "guest";
-    const username = sessionStorage.getItem("username") || "";
-
-    const btnOpenLogin = document.getElementById("btnOpenLogin");
-    const adminControls = document.getElementById("adminControls");
-    const currentUserBadge = document.getElementById("currentUserBadge");
-
-    const lockInvestigationAlert = document.getElementById("lockInvestigationAlert");
-    const investigationContent = document.getElementById("investigationContent");
-
-    const lockCostAlert = document.getElementById("lockCostAlert");
-    const costContent = document.getElementById("costContent");
-
-    if (role === "admin") {
-      // Đã đăng nhập Admin
-      btnOpenLogin.classList.add("d-none");
-      adminControls.classList.remove("d-none");
-      adminControls.classList.add("d-flex");
-      currentUserBadge.innerHTML = `<i class="fa-solid fa-user-shield me-1"></i>${username} (Admin)`;
-
-      // Hiện các nút dành riêng cho Admin
-      document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("d-none"));
-
-      // Mở khóa bấm các Tab 3 -> 7 ở Sidebar
-      document.querySelectorAll(".sidebar .nav-link").forEach(el => {
-        el.classList.remove("disabled-tab");
-      });
-      document.querySelectorAll(".small-lock").forEach(el => el.classList.add("d-none"));
-
-      // Mở nội dung Tab 3 & Tab 6
-      if(lockInvestigationAlert) lockInvestigationAlert.classList.add("d-none");
-      if(investigationContent) investigationContent.classList.remove("d-none");
-
-      if(lockCostAlert) lockCostAlert.classList.add("d-none");
-      if(costContent) costContent.classList.remove("d-none");
-
-    } else {
-      // Chế độ Khách (Guest)
-      btnOpenLogin.classList.remove("d-none");
-      adminControls.classList.add("d-none");
-      adminControls.classList.remove("d-flex");
-
-      // Ẩn tất cả các nút nhập liệu/thao tác Admin
-      document.querySelectorAll(".admin-only").forEach(el => el.classList.add("d-none"));
-
-      // Khóa bấm các Tab Sidebar (Tab 3 -> 7)
-      document.querySelectorAll(".sidebar .nav-link").forEach((el, idx) => {
-        if(idx >= 2) el.classList.add("disabled-tab");
-      });
-      document.querySelectorAll(".small-lock").forEach(el => el.classList.remove("d-none"));
-
-      // Ẩn nội dung chi tiết Tab 3 & 6, hiện Alert nhắc nhở
-      if(lockInvestigationAlert) lockInvestigationAlert.classList.remove("d-none");
-      if(investigationContent) investigationContent.classList.add("d-none");
-
-      if(lockCostAlert) lockCostAlert.classList.remove("d-none");
-      if(costContent) costContent.classList.add("d-none");
-    }
-  }
-
-  // CHUYỂN TAB CÓ CHECK QUYỀN
-  function switchTab(tabName, element) {
-    const role = sessionStorage.getItem("user_role") || "guest";
-    
-    // Nếu là Guest mà cố tình click vào các Tab bảo mật 3 -> 7
-    if (role !== "admin" && ['investigation', 'employee', 'bhxh', 'cost', 'reports'].includes(tabName)) {
-      alert("🔒 BẠN ĐANG TRUY CẬP VỚI QUYỀN KHÁCH!\nChỉ Tab 1 (Dashboard) và Tab 2 (Tai nạn) được mở xem. Vui lòng bấm 'Đăng Nhập Admin' để xem toàn bộ.");
-      return;
-    }
-
-    document.querySelectorAll('.tab-content-section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.sidebar .nav-link').forEach(el => el.classList.remove('active'));
-
-    var targetTab = document.getElementById('tab-' + tabName);
-    if(targetTab) targetTab.classList.add('active');
-    if(element) element.classList.add('active');
-
-    // Tự động thu gọn Sidebar trên Mobile khi bấm chuyển Tab
-    var sidebarMenu = document.getElementById('sidebarMenu');
-    var bsCollapse = bootstrap.Collapse.getInstance(sidebarMenu);
-    if (bsCollapse && window.innerWidth < 768) {
-      bsCollapse.hide();
-    }
-  }
-
-  // ĐĂNG NHẬP
-  function submitLogin() {
-    const usernameInput = document.getElementById("loginUsername").value.trim();
-    const passwordInput = document.getElementById("loginPassword").value.trim();
-    const alertBox = document.getElementById("loginAlert");
-    const btn = document.getElementById("btnLoginSubmit");
-
-    alertBox.classList.add("d-none");
-
-    if (!usernameInput || !passwordInput) {
-      alertBox.innerText = "Vui lòng nhập đầy đủ Username và Password!";
-      alertBox.classList.remove("d-none");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang xác thực...`;
-
-    fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: "login",
-        username: usernameInput,
-        password: passwordInput
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-key me-1"></i>Đăng Nhập`;
-
-      if (data.status === "success") {
-        sessionStorage.setItem("user_role", data.role || "admin");
-        sessionStorage.setItem("username", usernameInput);
-
-        const modalElement = document.getElementById('modalLogin');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        
-        document.getElementById("formLogin").reset();
-        checkUserRoleUI();
-        alert("Đăng nhập Admin thành công!");
-      } else {
-        alertBox.innerText = data.message || "Mật khẩu hoặc tài khoản sai!";
-        alertBox.classList.remove("d-none");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-key me-1"></i>Đăng Nhập`;
-      alertBox.innerText = "Không thể kết nối đến máy chủ!";
-      alertBox.classList.remove("d-none");
-    });
-  }
-
-  // ĐĂNG XUẤT
-  function logout() {
-    if (confirm("Bạn có chắc chắn muốn thoát khỏi quyền Admin?")) {
-      sessionStorage.clear();
-      checkUserRoleUI();
-      switchTab('dashboard', document.querySelectorAll('.sidebar .nav-link')[0]);
-      alert("Đã quay về quyền Khách!");
-    }
-  }
-
-  // TẠO USER MỚI (Admin)
-  function submitAddUser() {
-    const username = document.getElementById("newUsernameInput").value.trim();
-    const password = document.getElementById("newUserPassInput").value.trim();
-    const role = document.getElementById("newUserRoleSelect").value;
-    const alertBox = document.getElementById("addUserAlert");
-    const btn = document.getElementById("btnSubmitAddUser");
-
-    alertBox.classList.add("d-none");
-
-    if (!username || !password) {
-      alertBox.innerText = "Vui lòng nhập đủ Tên đăng nhập và Mật khẩu!";
-      alertBox.classList.remove("d-none");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...`;
-
-    fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: "addUser",
-        username: username,
-        password: password,
-        role: role
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
-
-      if (data.status === "success") {
-        alert("Thêm tài khoản mới thành công!");
-        const modalElement = document.getElementById('modalAddUser');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        document.getElementById("formAddUser").reset();
-      } else {
-        alertBox.innerText = data.message || "Tạo tài khoản không thành công!";
-        alertBox.classList.remove("d-none");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-check me-1"></i>Tạo Tài Khoản`;
-      alertBox.innerText = "Lỗi mạng hoặc hệ thống!";
-      alertBox.classList.remove("d-none");
-    });
-  }
-
-  // ĐỔI MẬT KHẨU
-  function submitChangePassword() {
-    const oldPass = document.getElementById("oldPassInput").value.trim();
-    const newPass = document.getElementById("newPassInput").value.trim();
-    const confirmPass = document.getElementById("confirmPassInput").value.trim();
-    const alertBox = document.getElementById("changePassAlert");
-
-    alertBox.classList.add("d-none");
-
-    if (newPass !== confirmPass) {
-      alertBox.innerText = "Mật khẩu xác nhận không trùng khớp!";
-      alertBox.classList.remove("d-none");
-      return;
-    }
-
-    fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: "changePassword",
-        oldPass: oldPass,
-        newPass: newPass,
-        username: sessionStorage.getItem("username") || ""
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === "success") {
-        alert("Đổi mật khẩu thành công!");
-        const modalElement = document.getElementById('modalChangePassword');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        document.getElementById("formChangePassword").reset();
-      } else {
-        alertBox.innerText = data.message || "Mật khẩu cũ không chính xác!";
-        alertBox.classList.remove("d-none");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alertBox.innerText = "Lỗi máy chủ!";
-      alertBox.classList.remove("d-none");
-    });
-  }
-
-  // LOAD KPI THỐNG KÊ
-  function loadDashboardKpi() {
-    fetch(`${API_URL}?action=getDashboardKpi`)
+  // 1. TẢI MASTER DATA TỪ TAB 'MASTER DATA' TRÊN GOOGLE SHEETS
+  function loadMasterData() {
+    fetch(`${API_URL}?action=getMasterData`)
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
-          const kpi = data.kpi;
-          document.getElementById("kpi-total-emp").innerText = (kpi.totalEmployee || 0).toLocaleString();
-          document.getElementById("kpi-accidents").innerText = String(kpi.totalAccident || 0).padStart(2, '0');
-          document.getElementById("kpi-lost-time").innerText = String(kpi.lostTime || 0).padStart(2, '0');
-          document.getElementById("kpi-near-miss").innerText = String(kpi.nearMiss || 0).padStart(2, '0');
-          document.getElementById("kpi-pending").innerText = String(kpi.pending || 0).padStart(2, '0');
-          document.getElementById("kpi-completed").innerText = String(kpi.completed || 0).padStart(2, '0');
+          masterDataStore = data.masterData;
+          renderSelectOptions();
         }
       })
-      .catch(err => console.error("Lỗi tải KPI:", err));
+      .catch(err => console.error("Lỗi Master Data:", err));
   }
 
-  // LOAD BẢNG TAI NẠN
-  function loadAccidentList() {
-    fetch(`${API_URL}?action=getAccidentList`)
+  // RENDER CÁC THẺ SELECT DỘNG TỪ MASTER DATA
+  function renderSelectOptions() {
+    // Select Bộ phận
+    const selectBoPhanModal = document.getElementById("selectBoPhan");
+    const filterBoPhan = document.getElementById("filterBoPhan");
+    
+    let htmlBoPhanModal = "";
+    let htmlBoPhanFilter = `<option value="">-- Tất cả Bộ Phận --</option>`;
+    
+    masterDataStore.boPhan.forEach(item => {
+      htmlBoPhanModal += `<option value="${item}">${item}</option>`;
+      htmlBoPhanFilter += `<option value="${item}">${item}</option>`;
+    });
+
+    if (selectBoPhanModal) selectBoPhanModal.innerHTML = htmlBoPhanModal;
+    if (filterBoPhan) filterBoPhan.innerHTML = htmlBoPhanFilter;
+
+    // Select Loại Sự Cố
+    const selectLoaiModal = document.getElementById("selectLoai");
+    const filterLoai = document.getElementById("filterLoai");
+
+    let htmlLoaiModal = "";
+    let htmlLoaiFilter = `<option value="">-- Tất cả Sự Cố --</option>`;
+
+    masterDataStore.loaiSuCo.forEach(item => {
+      htmlLoaiModal += `<option value="${item}">${item}</option>`;
+      htmlLoaiFilter += `<option value="${item}">${item}</option>`;
+    });
+
+    if (selectLoaiModal) selectLoaiModal.innerHTML = htmlLoaiModal;
+    if (filterLoai) filterLoai.innerHTML = htmlLoaiFilter;
+  }
+
+  // 2. PHÂN QUYỀN VÀ MỞ KHÓA TABS DỰA TRÊN ALLOWED TABS
+  function checkUserRoleUI() {
+    const role = sessionStorage.getItem("user_role") || "guest";
+    const username = sessionStorage.getItem("username") || "";
+    let allowedTabs = JSON.parse(sessionStorage.getItem("allowed_tabs") || "[1, 2]");
+
+    const btnOpenLogin = document.getElementById("btnOpenLogin");
+    const adminControls = document.getElementById("adminControls");
+
+    if (role === "admin") {
+      allowedTabs = [1, 2, 3, 4, 5, 6, 7]; // Admin xem full tab
+      document.querySelectorAll(".admin-only").forEach(el => el.classList.remove("d-none"));
+    } else {
+      document.querySelectorAll(".admin-only").forEach(el => el.classList.add("d-none"));
+    }
+
+    if (role !== "guest") {
+      btnOpenLogin.classList.add("d-none");
+      adminControls.classList.remove("d-none");
+      adminControls.classList.add("d-flex");
+      document.getElementById("currentUserBadge").innerText = `${username} (${role.toUpperCase()})`;
+    }
+
+    // Cập nhật giao diện Sidebar theo danh sách allowedTabs
+    document.querySelectorAll("#sidebarNavList .nav-link").forEach(el => {
+      const tabNum = parseInt(el.getAttribute("data-tab"), 10);
+      const lockIcon = el.querySelector(".small-lock");
+
+      if (allowedTabs.includes(tabNum)) {
+        el.classList.remove("disabled-tab");
+        if (lockIcon) lockIcon.classList.add("d-none");
+      } else {
+        el.classList.add("disabled-tab");
+        if (lockIcon) lockIcon.classList.remove("d-none");
+      }
+    });
+  }
+
+  // 3. ĐĂNG NHẬP
+  function submitLogin() {
+    const u = document.getElementById("loginUsername").value.trim();
+    const p = document.getElementById("loginPassword").value.trim();
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: "login", username: u, password: p })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "success") {
+        sessionStorage.setItem("user_role", data.role);
+        sessionStorage.setItem("username", data.username);
+        sessionStorage.setItem("allowed_tabs", JSON.stringify(data.allowedTabs || [1, 2]));
+
+        bootstrap.Modal.getInstance(document.getElementById('modalLogin')).hide();
+        checkUserRoleUI();
+        alert("Đăng nhập thành công!");
+      } else {
+        alert(data.message);
+      }
+    });
+  }
+
+  // 4. ADMIN TẢI VÀ LƯU BẢNG PHÂN QUYỀN USER TABS 1-7
+  function loadUserPermissions() {
+    fetch(`${API_URL}?action=getUserList`)
       .then(res => res.json())
       .then(data => {
-        const tbody = document.getElementById("accident-table-body");
-
-        if (data.status === "success" && data.data.length > 0) {
-          accidentDataStore = data.data; 
+        const tbody = document.getElementById("userPermissionTableBody");
+        if (data.status === "success") {
           tbody.innerHTML = "";
+          data.data.forEach(user => {
+            let checkboxes = "";
+            for (let i = 1; i <= 7; i++) {
+              let checked = user.allowedTabs.includes(i) ? "checked" : "";
+              checkboxes += `
+                <div class="form-check form-check-inline me-2">
+                  <input class="form-check-input user-tab-chk-${user.username}" type="checkbox" value="${i}" ${checked}>
+                  <label class="form-check-label">${i}</label>
+                </div>`;
+            }
 
-          data.data.forEach((item) => {
-            let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
-            let rowHtml = `
+            tbody.innerHTML += `
               <tr>
-                <td><strong>${item.maHoSo || ''}</strong></td>
-                <td>${item.ngay || ''}</td>
-                <td>${item.nguoiBiNan || ''}</td>
-                <td>${item.boPhan || ''}</td>
-                <td>${item.loai || ''}</td>
-                <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
+                <td><strong>${user.username}</strong></td>
+                <td><span class="badge bg-secondary">${user.role}</span></td>
+                <td>${checkboxes}</td>
                 <td>
-                  <button class="btn btn-sm btn-outline-primary" onclick="switchTab('accident', document.querySelectorAll('.sidebar .nav-link')[1])">
-                    <i class="fa-solid fa-eye me-1"></i>Chi tiết
-                  </button>
+                  <button class="btn btn-sm btn-success" onclick="saveUserPermission('${user.username}')">Lưu</button>
                 </td>
-              </tr>
-            `;
-            tbody.innerHTML += rowHtml;
+              </tr>`;
           });
-
-          filterAccidentTable();
-        } else {
-          tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu tai nạn.</td></tr>`;
         }
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("accident-table-body").innerHTML = 
-          `<tr><td colspan="7" class="text-center text-muted py-3">Chưa có dữ liệu từ Google Sheets.</td></tr>`;
       });
   }
 
-  // LỌC DỮ LIỆU TẠI TAB 2
-  function filterAccidentTable() {
-    const keyword = (document.getElementById("filterKeyword")?.value || "").toLowerCase().trim();
-    const boPhan = document.getElementById("filterBoPhan")?.value || "";
-    const loai = document.getElementById("filterLoai")?.value || "";
-    const tbody = document.getElementById("accident-full-table");
-
-    if (!tbody) return;
-
-    let filtered = accidentDataStore.filter(item => {
-      let matchKeyword = !keyword || 
-        (item.maHoSo && item.maHoSo.toLowerCase().includes(keyword)) ||
-        (item.nguoiBiNan && item.nguoiBiNan.toLowerCase().includes(keyword)) ||
-        (item.maNV && item.maNV.toLowerCase().includes(keyword));
-
-      let matchBoPhan = !boPhan || item.boPhan === boPhan;
-      let matchLoai = !loai || item.loai === loai;
-
-      return matchKeyword && matchBoPhan && matchLoai;
-    });
-
-    if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-3">Không tìm thấy kết quả phù hợp.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = "";
-    filtered.forEach((item) => {
-      let badgeClass = item.trangThai === "Hoàn tất" ? "bg-success" : "bg-warning text-dark";
-      let rowHtml = `
-        <tr>
-          <td><strong>${item.maHoSo || ''}</strong></td>
-          <td>${item.ngay || ''}</td>
-          <td>${item.nguoiBiNan || ''}</td>
-          <td>${item.maNV || ''}</td>
-          <td>${item.boPhan || ''}</td>
-          <td>${item.loai || ''}</td>
-          <td><span class="badge ${badgeClass}">${item.trangThai || 'Chưa điều tra'}</span></td>
-          <td>
-            <button class="btn btn-sm btn-outline-primary">
-              <i class="fa-solid fa-eye me-1"></i>Xem
-            </button>
-          </td>
-        </tr>
-      `;
-      tbody.innerHTML += rowHtml;
-    });
-  }
-
-  // GỬI BÁO CÁO TAI NẠN MỚI
-  function submitAccidentForm() {
-    const hoTen = document.getElementById("inputHoTen").value.trim();
-    const maNV = document.getElementById("inputMaNV").value.trim();
-    const ngay = document.getElementById("inputNgay").value;
-    const boPhan = document.getElementById("selectBoPhan").value;
-    const loai = document.getElementById("selectLoai").value;
-    const moTa = document.getElementById("inputMoTa").value.trim();
-    const btn = document.getElementById("btnSaveAccident");
-
-    if (!hoTen || !maNV || !ngay) {
-      alert("Vui lòng điền đầy đủ Tên, Mã NV và Thời gian!");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...`;
+  function saveUserPermission(username) {
+    const chks = document.querySelectorAll(`.user-tab-chk-${username}:checked`);
+    let selectedTabs = Array.from(chks).map(cb => parseInt(cb.value, 10));
 
     fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
-        action: "addAccident",
-        nguoiBiNan: hoTen,
-        maNV: maNV,
-        ngay: ngay,
-        boPhan: boPhan,
-        loai: loai,
-        moTa: moTa
+        action: "updateUserPermissions",
+        targetUsername: username,
+        allowedTabs: selectedTabs
       })
     })
     .then(res => res.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
+    .then(data => alert(data.message));
+  }
 
-      if (data.status === "success") {
-        alert("Báo cáo sự cố/tai nạn mới thành công!");
-        const modalElement = document.getElementById('modalNewAccident');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        if (modal) modal.hide();
-        document.getElementById("formNewAccident").reset();
-        
-        loadDashboardKpi();
-        loadAccidentList();
-      } else {
-        alert(data.message || "Gửi thất bại!");
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-floppy-disk me-1"></i> Lưu Báo Cáo`;
-      alert("Lỗi kết nối máy chủ!");
-    });
+  function logout() {
+    sessionStorage.clear();
+    location.reload();
+  }
+
+  function switchTab(tabName, el) {
+    document.querySelectorAll('.tab-content-section').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('tab-' + tabName).classList.add('active');
+    if (el) el.classList.add('active');
   }
 </script>
 </body>
