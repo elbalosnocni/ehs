@@ -57,6 +57,8 @@ function loadModule(moduleId) {
   // Render màn hình tương ứng
   if (moduleId === 'dashboard') {
     renderDashboardView();
+  } else if (moduleId === 'accident') {
+    renderAccidentView(); // Thêm nhánh này
   } else {
     document.getElementById('mainContainer').innerHTML = `<div class="p-8 text-center text-slate-500">Màn hình <b>${activeMenu.label}</b> đang được phát triển...</div>`;
   }
