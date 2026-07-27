@@ -161,3 +161,75 @@ async function renderAccidentView() {
   // Bắt sự kiện Submit Form
   document.getElementById('accidentForm').addEventListener('submit', handleSaveAccident);
 }
+
+function getSeverityBadge(severity) {
+  switch(severity) {
+    case 'Nghiêm trọng': return 'bg-orange-100 text-orange-800';
+    case 'Rất nghiêm trọng': return 'bg-red-100 text-red-800';
+    case 'Trung bình': return 'bg-yellow-100 text-yellow-800';
+    default: return 'bg-green-100 text-green-800';
+  }
+}
+
+function openAccidentModal() {
+  document.getElementById('accidentModal').classList.remove('hidden');
+}
+
+function closeAccidentModal() {
+  document.getElementById('accidentModal').classList.add('hidden');
+}
+
+async function handleSaveAccident(e) {
+  e.preventDefault();
+  const btn = document.getElementById('saveAccidentBtn');
+  btn.innerText = "Đang lưu & Upload...";
+  btn.disabled = true;
+
+  // Đọc file nếu có đính kèm
+  const fileInput = document.getElementById('accFiles');
+  const filesData = [];
+
+  if (fileInput.files.length > 0) {
+    for (let file of fileInput.files) {
+      const base64 = await convertBase64(file);
+      filesData.push({
+        fileName: file.name,
+        mimeType: file.type,
+        base64: base64.split(',')[1] // Lấy chuỗi mã hóa
+      });
+    }
+  }
+
+  const payload = {
+    empId: document.getElementById('accEmpId').value,
+    incidentDate: document.getElementById('accDate').value,
+    location: document.getElementById('accLocation').value,
+    incidentType: document.getElementById('accType').value,
+    severity: document.getElementById('accSeverity').value,
+    witness: document.getElementById('accWitness').value,
+    description: document.getElementById('accDesc').value,
+    files: filesData,
+    userId: currentUser.userId
+  };
+
+  const res = await API.post('createAccident', payload);
+
+  if (res.status === 'success') {
+    alert('Tạo hồ sơ thành công! Mã hồ sơ: ' + res.accidentId);
+    closeAccidentModal();
+    renderAccidentView(); // Refresh danh sách
+  } else {
+    alert('Lỗi: ' + res.message);
+    btn.innerText = "Lưu Hồ Sơ";
+    btn.disabled = false;
+  }
+}
+
+function convertBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
