@@ -25,22 +25,22 @@ async function renderAccidentView() {
 
     return `
       <tr class="border-b hover:bg-slate-50 transition">
-        <td class="p-3 font-semibold text-blue-600">${id}</td>
-        <td class="p-3 font-medium">${empId}</td>
-        <td class="p-3">${formattedDate}</td>
-        <td class="p-3">${location}</td>
-        <td class="p-3">${type}</td>
-        <td class="p-3">
+        <td class="p-3 font-semibold text-blue-600 whitespace-nowrap">${id}</td>
+        <td class="p-3 font-medium whitespace-nowrap">${empId}</td>
+        <td class="p-3 whitespace-nowrap">${formattedDate}</td>
+        <td class="p-3 whitespace-nowrap">${location}</td>
+        <td class="p-3 whitespace-nowrap">${type}</td>
+        <td class="p-3 whitespace-nowrap">
           <span class="px-2 py-1 text-xs rounded-full font-semibold ${getSeverityBadge(severity)}">
             ${severity}
           </span>
         </td>
-        <td class="p-3">
+        <td class="p-3 whitespace-nowrap">
           <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700 font-medium">
             ${status}
           </span>
         </td>
-        <td class="p-3 text-center">
+        <td class="p-3 text-center whitespace-nowrap">
           <button onclick="viewAccidentDetail('${id}')" class="text-blue-600 hover:text-blue-800 p-1" title="Chi tiết">
             <i class="fa-solid fa-eye text-base"></i>
           </button>
@@ -54,47 +54,50 @@ async function renderAccidentView() {
   }
 
   container.innerHTML = `
-    <!-- TOP BAR -->
-    <div class="flex justify-between items-center mb-6">
-      <div class="flex space-x-2">
-        <input type="text" placeholder="Tìm kiếm theo Mã/NV..." class="px-3 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 w-64">
+    <!-- TOP BAR (Tối ưu Responsive linh hoạt) -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center mb-6">
+      <div class="relative flex-1 min-w-0 max-w-md">
+        <input type="text" placeholder="Tìm kiếm theo Mã/NV..." class="w-full pl-10 pr-4 py-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
       </div>
-      <button onclick="openAccidentModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm flex items-center space-x-2 shadow-sm transition">
+      <button onclick="openAccidentModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm flex items-center justify-center space-x-2 shadow-sm transition whitespace-nowrap">
         <i class="fa-solid fa-plus"></i>
         <span>Khai báo Tai nạn mới</span>
       </button>
     </div>
 
-    <!-- TABLE -->
+    <!-- TABLE (Hỗ trợ cuộn ngang mượt mà trên di động) -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <table class="w-full text-left text-sm">
-        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
-          <tr>
-            <th class="p-3">Mã Hồ Sơ</th>
-            <th class="p-3">Mã NV</th>
-            <th class="p-3">Thời Gian</th>
-            <th class="p-3">Địa Điểm</th>
-            <th class="p-3">Loại Sự Cố</th>
-            <th class="p-3">Mức Độ</th>
-            <th class="p-3">Trạng Thái</th>
-            <th class="p-3 text-center">Thao Tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
+      <div class="overflow-x-auto w-full">
+        <table class="w-full text-left text-sm min-w-[700px]">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-xs">
+            <tr>
+              <th class="p-3">Mã Hồ Sơ</th>
+              <th class="p-3">Mã NV</th>
+              <th class="p-3">Thời Gian</th>
+              <th class="p-3">Địa Điểm</th>
+              <th class="p-3">Loại Sự Cố</th>
+              <th class="p-3">Mức Độ</th>
+              <th class="p-3">Trạng Thái</th>
+              <th class="p-3 text-center">Thao Tác</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- MODAL KHAI BÁO -->
     <div id="accidentModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+        <div class="p-4 border-b flex justify-between items-center bg-slate-50 sticky top-0 z-10">
           <h3 class="font-bold text-slate-800">Khai Báo Tai Nạn / Sự Cố Mới</h3>
-          <button onclick="closeAccidentModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+          <button onclick="closeAccidentModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
-        <form id="accidentForm" class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
+        <form id="accidentForm" class="p-4 sm:p-6 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Nhân Viên *</label>
               <input type="text" id="accEmpId" required onblur="checkEmployeeName(this.value)" placeholder="Ví dụ: PR5511" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 uppercase">
@@ -106,7 +109,7 @@ async function renderAccidentView() {
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Địa Điểm Xảy Ra *</label>
               <input type="text" id="accLocation" required class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -122,7 +125,7 @@ async function renderAccidentView() {
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Mức Độ Nghiêm Trọng</label>
               <select id="accSeverity" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
@@ -150,7 +153,7 @@ async function renderAccidentView() {
 
           <div class="flex justify-end space-x-3 pt-4 border-t">
             <button type="button" onclick="closeAccidentModal()" class="px-4 py-2 border rounded-lg text-sm text-slate-600 hover:bg-slate-100">Hủy</button>
-            <button type="submit" id="saveAccidentBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg">Lưu Hồ Sơ</button>
+            <button type="submit" id="saveAccidentBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-sm">Lưu Hồ Sơ</button>
           </div>
         </form>
       </div>
@@ -176,7 +179,7 @@ async function checkEmployeeName(empId) {
 
   try {
     const res = await API.get('getEmployees'); 
-    console.log("Dữ liệu nhân viên trả về từ GAS:", res); // Nhấn F12 để kiểm tra
+    console.log("Dữ liệu nhân viên trả về từ GAS:", res);
 
     if (!res || res.status !== 'success' || !Array.isArray(res.data)) {
       previewEl.innerText = '⚠️ Không thể tải danh sách NV (Lỗi API/GAS)';
@@ -217,7 +220,8 @@ function getSeverityBadge(severity) {
 }
 
 function openAccidentModal() {
-  document.getElementById('empNamePreview').innerText = '';
+  const preview = document.getElementById('empNamePreview');
+  if (preview) preview.innerText = '';
   document.getElementById('accidentModal').classList.remove('hidden');
 }
 
@@ -354,15 +358,15 @@ async function viewAccidentDetail(accidentId) {
   // 4. Render popup
   detailModal.innerHTML = `
     <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-      <div class="p-4 border-b flex justify-between items-center bg-slate-50">
-        <h3 class="font-bold text-slate-800 text-lg">Chi Tiết Hồ Sơ: <span class="text-blue-600">${id}</span></h3>
-        <button onclick="document.getElementById('accidentDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+      <div class="p-4 border-b flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+        <h3 class="font-bold text-slate-800 text-base sm:text-lg">Chi Tiết Hồ Sơ: <span class="text-blue-600">${id}</span></h3>
+        <button onclick="document.getElementById('accidentDetailModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
 
-      <div class="p-6 space-y-4 text-sm">
-        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+      <div class="p-4 sm:p-6 space-y-4 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div><span class="text-xs text-slate-500 font-semibold block">NGƯỜI BỊ TAI NẠN</span><span class="font-bold text-slate-800">${empFullName}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">TRẠNG THÁI</span><span class="font-semibold text-blue-600">${status}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">THỜI GIAN XẢY RA</span><span>${rawDate ? (isNaN(new Date(rawDate).getTime()) ? rawDate : new Date(rawDate).toLocaleString('vi-VN')) : '--'}</span></div>
@@ -387,7 +391,7 @@ async function viewAccidentDetail(accidentId) {
         </div>
       </div>
 
-      <div class="p-4 border-t bg-slate-50 flex justify-end">
+      <div class="p-4 border-t bg-slate-50 flex justify-end sticky bottom-0 z-10">
         <button onclick="document.getElementById('accidentDetailModal').classList.add('hidden')" class="px-5 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition">Đóng</button>
       </div>
     </div>
