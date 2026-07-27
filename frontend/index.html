@@ -12,12 +12,22 @@
 </head>
 <body class="bg-slate-100 font-sans text-slate-800">
 
-  <div class="flex h-screen overflow-hidden">
-    <!-- SIDEBAR -->
-    <aside class="w-64 bg-slate-900 text-white flex flex-col flex-shrink-0">
-      <div class="p-4 text-xl font-bold border-b border-slate-800 flex items-center space-x-2">
-        <i class="fa-solid fa-shield-halved text-blue-500"></i>
-        <span>EHS MANAGER</span>
+  <div class="flex h-screen overflow-hidden relative">
+
+    <!-- OVERLAY NỀN ĐEN KHI MỞ MENU TRÊN MOBILE -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden md:hidden transition-opacity"></div>
+
+    <!-- SIDEBAR (Đã tối ưu Responsive) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white flex flex-col flex-shrink-0 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-300 ease-in-out shadow-xl md:shadow-none">
+      <div class="p-4 text-xl font-bold border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-shield-halved text-blue-500"></i>
+          <span>EHS MANAGER</span>
+        </div>
+        <!-- Nút đóng Sidebar trên Mobile -->
+        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
       </div>
       
       <!-- MENU CÓ PHÂN QUYỀN -->
@@ -38,19 +48,41 @@
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
+    <main class="flex-1 flex flex-col overflow-y-auto w-full min-w-0">
       <!-- HEADER -->
-      <header class="bg-white shadow-sm p-4 flex justify-between items-center">
-        <h1 id="pageTitle" class="text-xl font-bold text-slate-800">Dashboard Tổng Quan</h1>
-        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-blue-100 text-blue-800" id="currentYear">Năm 2026</span>
+      <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-20">
+        <div class="flex items-center space-x-3">
+          <!-- Nút Hamburger Menu mở Sidebar trên Mobile -->
+          <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 focus:outline-none">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+          <h1 id="pageTitle" class="text-lg md:text-xl font-bold text-slate-800 truncate">Dashboard Tổng Quan</h1>
+        </div>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded bg-blue-100 text-blue-800 flex-shrink-0" id="currentYear">Năm 2026</span>
       </header>
 
       <!-- CONTAINER CHỨA NỘI DUNG -->
-      <div id="mainContainer" class="p-6">
+      <div id="mainContainer" class="p-4 md:p-6 overflow-x-auto">
         <!-- Nội dung sẽ được nạp động từ Dashboard, Accident, Investigation... -->
       </div>
     </main>
   </div>
+
+  <!-- SCRIPT BỔ SUNG TOGGLE SIDEBAR -->
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+  </script>
 
   <script src="config.js"></script>
   <script src="api.js"></script>
