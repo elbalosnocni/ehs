@@ -163,26 +163,47 @@ async function renderAccidentView() {
 // Kiểm tra tên NV khi nhập Mã NV trong Form
 async function checkEmployeeName(empId) {
   const previewEl = document.getElementById('empNamePreview');
-  if (!empId.trim()) {
+  if (!previewEl) return;
+
+  const cleanEmpId = empId.toString().trim().toUpperCase();
+  if (!cleanEmpId) {
     previewEl.innerText = '';
     return;
   }
   
   previewEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tra cứu nhân viên...';
   previewEl.className = "text-xs font-semibold text-blue-600 mt-1 block";
-  
-  const res = await API.get('getEmployees'); 
-  const employees = res.data || [];
-  const emp = employees.find(e => (e.EmpID || e.empId || e['Mã NV']) === empId.trim().toUpperCase());
 
-  if (emp) {
-    const fullName = emp.FullName || emp.fullName || emp['Họ và Tên'] || emp['Họ Tên'] || '';
-    const dept = emp.Department || emp.department || emp['Bộ phận'] || '';
-    previewEl.innerText = `✓ Họ tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
-    previewEl.className = "text-xs font-semibold text-emerald-600 mt-1 block";
-  } else {
-    previewEl.innerText = '⚠️ Không tìm thấy Mã NV trong hệ thống!';
-    previewEl.className = "text-xs font-semibold text-amber-600 mt-1 block";
+  try {
+    const res = await API.get('getEmployees'); 
+    console.log("Dữ liệu nhân viên trả về từ GAS:", res); // Nhấn F12 để kiểm tra
+
+    if (!res || res.status !== 'success' || !Array.isArray(res.data)) {
+      previewEl.innerText = '⚠️ Không thể tải danh sách NV (Lỗi API/GAS)';
+      previewEl.className = "text-xs font-semibold text-red-600 mt-1 block";
+      return;
+    }
+
+    const employees = res.data;
+    // Tìm kiếm linh hoạt không phân biệt hoa thường và đọc nhiều tên cột khác nhau
+    const emp = employees.find(e => {
+      const val = (e.EmpID || e.empId || e['Mã NV'] || e['Mã nhân viên'] || '').toString().trim().toUpperCase();
+      return val === cleanEmpId;
+    });
+
+    if (emp) {
+      const fullName = emp.FullName || emp.fullName || emp['Họ và Tên'] || emp['Họ Tên'] || emp['Họ tên'] || '';
+      const dept = emp.Department || emp.department || emp['Bộ phận'] || '';
+      previewEl.innerText = `✓ Họ tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
+      previewEl.className = "text-xs font-semibold text-emerald-600 mt-1 block";
+    } else {
+      previewEl.innerText = '⚠️ Không tìm thấy Mã NV trong hệ thống!';
+      previewEl.className = "text-xs font-semibold text-amber-600 mt-1 block";
+    }
+  } catch (err) {
+    console.error("Lỗi gọi API getEmployees:", err);
+    previewEl.innerText = '⚠️ Lỗi kết nối máy chủ!';
+    previewEl.className = "text-xs font-semibold text-red-600 mt-1 block";
   }
 }
 
