@@ -6,30 +6,50 @@ async function renderAccidentView() {
   const res = await API.get('getAccidents');
   const accidents = res.data || [];
 
-  let tableRows = accidents.map(item => `
-    <tr class="border-b hover:bg-slate-50 transition">
-      <td class="p-3 font-semibold text-blue-600">${item.AccidentID || ''}</td>
-      <td class="p-3">${item.EmpID || ''}</td>
-      <td class="p-3">${item.IncidentDate ? new Date(item.IncidentDate).toLocaleString('vi-VN') : ''}</td>
-      <td class="p-3">${item.Location || ''}</td>
-      <td class="p-3">${item.IncidentType || ''}</td>
-      <td class="p-3">
-        <span class="px-2 py-1 text-xs rounded-full font-semibold ${getSeverityBadge(item.Severity)}">
-          ${item.Severity || 'Nhe'}
-        </span>
-      </td>
-      <td class="p-3">
-        <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700 font-medium">
-          ${item.Status || 'Moi ghi nhan'}
-        </span>
-      </td>
-      <td class="p-3 text-center">
-        <button onclick="viewAccidentDetail('${item.AccidentID}')" class="text-blue-600 hover:text-blue-800 mr-2" title="Chi tiết">
-          <i class="fa-solid fa-eye"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
+  let tableRows = accidents.map(item => {
+    // Lấy dữ liệu hỗ trợ cả 2 chuẩn tên thuộc tính (Hoa/Thường)
+    const id = item.AccidentID || item.accidentId || item['Mã Hồ Sơ'] || '';
+    const empId = item.EmpID || item.empId || item['Mã NV'] || '';
+    const rawDate = item.IncidentDate || item.incidentDate || item['Thời Gian'] || '';
+    const location = item.Location || item.location || item['Địa Điểm'] || '';
+    const type = item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
+    const severity = item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
+    const status = item.Status || item.status || item['Trạng Thái'] || 'Mới ghi nhận';
+
+    // Format ngày tháng
+    let formattedDate = rawDate;
+    if (rawDate) {
+      const d = new Date(rawDate);
+      if (!isNaN(d.getTime())) {
+        formattedDate = d.toLocaleString('vi-VN');
+      }
+    }
+
+    return `
+      <tr class="border-b hover:bg-slate-50 transition">
+        <td class="p-3 font-semibold text-blue-600">${id}</td>
+        <td class="p-3">${empId}</td>
+        <td class="p-3">${formattedDate}</td>
+        <td class="p-3">${location}</td>
+        <td class="p-3">${type}</td>
+        <td class="p-3">
+          <span class="px-2 py-1 text-xs rounded-full font-semibold ${getSeverityBadge(severity)}">
+            ${severity}
+          </span>
+        </td>
+        <td class="p-3">
+          <span class="px-2 py-1 text-xs rounded-full bg-slate-100 text-slate-700 font-medium">
+            ${status}
+          </span>
+        </td>
+        <td class="p-3 text-center">
+          <button onclick="viewAccidentDetail('${id}')" class="text-blue-600 hover:text-blue-800 p-1" title="Chi tiết">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 
   if (accidents.length === 0) {
     tableRows = `<tr><td colspan="8" class="text-center p-8 text-slate-400">Chưa có hồ sơ tai nạn nào được ghi nhận.</td></tr>`;
@@ -95,10 +115,10 @@ async function renderAccidentView() {
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Loại Sự Cố *</label>
               <select id="accType" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="TNLĐ Nghỉ Việc">Tai nạn lao động nghỉ việc</option>
-                <option value="TNLĐ Sơ Cứu">Tai nạn sơ cứu</option>
-                <option value="Near Miss">Sự cố suýt giật (Near Miss)</option>
-                <option value="Sự cố tài sản">Sự cố hỏng hóc tài sản</option>
+                <option value="Tai nạn lao động nghỉ việc">Tai nạn lao động nghỉ việc</option>
+                <option value="Tai nạn sơ cứu">Tai nạn sơ cứu</option>
+                <option value="Sự cố suýt giật (Near Miss)">Sự cố suýt giật (Near Miss)</option>
+                <option value="Sự cố hỏng hóc tài sản">Sự cố hỏng hóc tài sản</option>
               </select>
             </div>
           </div>
@@ -140,76 +160,4 @@ async function renderAccidentView() {
 
   // Bắt sự kiện Submit Form
   document.getElementById('accidentForm').addEventListener('submit', handleSaveAccident);
-}
-
-function getSeverityBadge(severity) {
-  switch(severity) {
-    case 'Nghiêm trọng': return 'bg-orange-100 text-orange-800';
-    case 'Rất nghiêm trọng': return 'bg-red-100 text-red-800';
-    case 'Trung bình': return 'bg-yellow-100 text-yellow-800';
-    default: return 'bg-green-100 text-green-800';
-  }
-}
-
-function openAccidentModal() {
-  document.getElementById('accidentModal').classList.remove('hidden');
-}
-
-function closeAccidentModal() {
-  document.getElementById('accidentModal').classList.add('hidden');
-}
-
-async function handleSaveAccident(e) {
-  e.preventDefault();
-  const btn = document.getElementById('saveAccidentBtn');
-  btn.innerText = "Đang lưu & Upload...";
-  btn.disabled = true;
-
-  // Đọc file nếu có đính kèm
-  const fileInput = document.getElementById('accFiles');
-  const filesData = [];
-
-  if (fileInput.files.length > 0) {
-    for (let file of fileInput.files) {
-      const base64 = await convertBase64(file);
-      filesData.push({
-        fileName: file.name,
-        mimeType: file.type,
-        base64: base64.split(',')[1] // Lấy chuỗi mã hóa
-      });
-    }
-  }
-
-  const payload = {
-    empId: document.getElementById('accEmpId').value,
-    incidentDate: document.getElementById('accDate').value,
-    location: document.getElementById('accLocation').value,
-    incidentType: document.getElementById('accType').value,
-    severity: document.getElementById('accSeverity').value,
-    witness: document.getElementById('accWitness').value,
-    description: document.getElementById('accDesc').value,
-    files: filesData,
-    userId: currentUser.userId
-  };
-
-  const res = await API.post('createAccident', payload);
-
-  if (res.status === 'success') {
-    alert('Tạo hồ sơ thành công! Mã hồ sơ: ' + res.accidentId);
-    closeAccidentModal();
-    renderAccidentView(); // Refresh danh sách
-  } else {
-    alert('Lỗi: ' + res.message);
-    btn.innerText = "Lưu Hồ Sơ";
-    btn.disabled = false;
-  }
-}
-
-function convertBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-  });
 }
