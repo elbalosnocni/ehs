@@ -17,8 +17,10 @@ const MENU_ITEMS = [
 
 document.addEventListener('DOMContentLoaded', () => {
   // Hiển thị thông tin User
-  document.getElementById('userDisplayName').innerText = currentUser.username;
-  document.getElementById('userDisplayRole').innerText = currentUser.role;
+  const nameEl = document.getElementById('userDisplayName');
+  const roleEl = document.getElementById('userDisplayRole');
+  if (nameEl) nameEl.innerText = currentUser.username;
+  if (roleEl) roleEl.innerText = currentUser.role;
 
   // Render Sidebar Menu theo Role
   renderSidebar();
@@ -29,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function renderSidebar() {
   const menuContainer = document.getElementById('sidebarMenu');
+  if (!menuContainer) return;
+  
   menuContainer.innerHTML = '';
 
   MENU_ITEMS.forEach(item => {
@@ -45,22 +49,40 @@ function renderSidebar() {
 }
 
 function loadModule(moduleId) {
-  // Highlight active menu
+  // 1. Tự động đóng Sidebar & Overlay khi chọn menu trên Mobile
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  
+  if (sidebar) {
+    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('translate-x-0');
+  }
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+
+  // 2. Highlight active menu
   document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
   const activeBtn = document.getElementById(`nav-${moduleId}`);
   if (activeBtn) activeBtn.classList.add('bg-blue-600', 'text-white');
 
-  // Đổi Title
+  // 3. Đổi Title trang
   const activeMenu = MENU_ITEMS.find(m => m.id === moduleId);
-  if (activeMenu) document.getElementById('pageTitle').innerText = activeMenu.label;
+  if (activeMenu) {
+    const titleEl = document.getElementById('pageTitle');
+    if (titleEl) titleEl.innerText = activeMenu.label;
+  }
 
-  // Render màn hình tương ứng
+  // 4. Render màn hình tương ứng
   if (moduleId === 'dashboard') {
-    renderDashboardView();
+    if (typeof renderDashboardView === 'function') renderDashboardView();
   } else if (moduleId === 'accident') {
-    renderAccidentView(); // Thêm nhánh này
+    if (typeof renderAccidentView === 'function') renderAccidentView();
   } else {
-    document.getElementById('mainContainer').innerHTML = `<div class="p-8 text-center text-slate-500">Màn hình <b>${activeMenu.label}</b> đang được phát triển...</div>`;
+    const container = document.getElementById('mainContainer');
+    if (container) {
+      container.innerHTML = `<div class="p-8 text-center text-slate-500">Màn hình <b>${activeMenu ? activeMenu.label : ''}</b> đang được phát triển...</div>`;
+    }
   }
 }
 
