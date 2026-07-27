@@ -7,7 +7,6 @@ async function renderAccidentView() {
   const accidents = res.data || [];
 
   let tableRows = accidents.map(item => {
-    // Lấy dữ liệu hỗ trợ cả 2 chuẩn tên thuộc tính (Hoa/Thường)
     const id = item.AccidentID || item.accidentId || item['Mã Hồ Sơ'] || '';
     const empId = item.EmpID || item.empId || item['Mã NV'] || '';
     const rawDate = item.IncidentDate || item.incidentDate || item['Thời Gian'] || '';
@@ -16,7 +15,6 @@ async function renderAccidentView() {
     const severity = item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
     const status = item.Status || item.status || item['Trạng Thái'] || 'Mới ghi nhận';
 
-    // Format ngày tháng
     let formattedDate = rawDate;
     if (rawDate) {
       const d = new Date(rawDate);
@@ -28,7 +26,7 @@ async function renderAccidentView() {
     return `
       <tr class="border-b hover:bg-slate-50 transition">
         <td class="p-3 font-semibold text-blue-600">${id}</td>
-        <td class="p-3">${empId}</td>
+        <td class="p-3 font-medium">${empId}</td>
         <td class="p-3">${formattedDate}</td>
         <td class="p-3">${location}</td>
         <td class="p-3">${type}</td>
@@ -44,7 +42,7 @@ async function renderAccidentView() {
         </td>
         <td class="p-3 text-center">
           <button onclick="viewAccidentDetail('${id}')" class="text-blue-600 hover:text-blue-800 p-1" title="Chi tiết">
-            <i class="fa-solid fa-eye"></i>
+            <i class="fa-solid fa-eye text-base"></i>
           </button>
         </td>
       </tr>
@@ -99,7 +97,8 @@ async function renderAccidentView() {
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Mã Nhân Viên *</label>
-              <input type="text" id="accEmpId" required class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <input type="text" id="accEmpId" required onblur="checkEmployeeName(this.value)" placeholder="Ví dụ: PR5511" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 uppercase">
+              <span id="empNamePreview" class="text-xs font-semibold mt-1 block"></span>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Thời Gian Xảy Ra *</label>
@@ -158,8 +157,33 @@ async function renderAccidentView() {
     </div>
   `;
 
-  // Bắt sự kiện Submit Form
   document.getElementById('accidentForm').addEventListener('submit', handleSaveAccident);
+}
+
+// Kiểm tra tên NV khi nhập Mã NV trong Form
+async function checkEmployeeName(empId) {
+  const previewEl = document.getElementById('empNamePreview');
+  if (!empId.trim()) {
+    previewEl.innerText = '';
+    return;
+  }
+  
+  previewEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tra cứu nhân viên...';
+  previewEl.className = "text-xs font-semibold text-blue-600 mt-1 block";
+  
+  const res = await API.get('getEmployees'); 
+  const employees = res.data || [];
+  const emp = employees.find(e => (e.EmpID || e.empId || e['Mã NV']) === empId.trim().toUpperCase());
+
+  if (emp) {
+    const fullName = emp.FullName || emp.fullName || emp['Họ và Tên'] || emp['Họ Tên'] || '';
+    const dept = emp.Department || emp.department || emp['Bộ phận'] || '';
+    previewEl.innerText = `✓ Họ tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
+    previewEl.className = "text-xs font-semibold text-emerald-600 mt-1 block";
+  } else {
+    previewEl.innerText = '⚠️ Không tìm thấy Mã NV trong hệ thống!';
+    previewEl.className = "text-xs font-semibold text-amber-600 mt-1 block";
+  }
 }
 
 function getSeverityBadge(severity) {
@@ -172,6 +196,7 @@ function getSeverityBadge(severity) {
 }
 
 function openAccidentModal() {
+  document.getElementById('empNamePreview').innerText = '';
   document.getElementById('accidentModal').classList.remove('hidden');
 }
 
@@ -185,7 +210,6 @@ async function handleSaveAccident(e) {
   btn.innerText = "Đang lưu & Upload...";
   btn.disabled = true;
 
-  // 1. Đọc file nếu có đính kèm
   const fileInput = document.getElementById('accFiles');
   const filesData = [];
 
@@ -200,7 +224,6 @@ async function handleSaveAccident(e) {
     }
   }
 
-  // 2. Thu thập dữ liệu từ Input
   const payload = {
     empId: document.getElementById('accEmpId').value,
     incidentDate: document.getElementById('accDate').value,
@@ -213,19 +236,16 @@ async function handleSaveAccident(e) {
     userId: currentUser ? currentUser.userId : ''
   };
 
-  // 3. Gửi lên API
   const res = await API.post('createAccident', payload);
 
   if (res.status === 'success') {
     alert('Tạo hồ sơ thành công! Mã hồ sơ: ' + res.accidentId);
-    
-    // ✅ CHỈ RESET FORM KHI ĐÃ LƯU THÀNH CÔNG VÀ NÚT BẤM TRỞ LẠI BÌNH THƯỜNG
     document.getElementById('accidentForm').reset();
     btn.innerText = "Lưu Hồ Sơ";
     btn.disabled = false;
     
     closeAccidentModal();
-    renderAccidentView(); // Reload lại danh sách
+    renderAccidentView();
   } else {
     alert('Lỗi: ' + res.message);
     btn.innerText = "Lưu Hồ Sơ";
@@ -241,9 +261,9 @@ function convertBase64(file) {
     reader.onerror = error => reject(error);
   });
 }
-// Thêm hàm Xem chi tiết hồ sơ vào cuối file frontend/accident.js
+
+// XEM CHI TIẾT HỒ SƠ
 async function viewAccidentDetail(accidentId) {
-  // Tạo Modal xem chi tiết nếu chưa có
   let detailModal = document.getElementById('accidentDetailModal');
   if (!detailModal) {
     detailModal = document.createElement('div');
@@ -260,7 +280,7 @@ async function viewAccidentDetail(accidentId) {
   `;
   detailModal.classList.remove('hidden');
 
-  // Gọi API lấy dữ liệu tất cả tai nạn
+  // 1. Lấy dữ liệu hồ sơ tai nạn
   const res = await API.get('getAccidents');
   const list = res.data || [];
   const item = list.find(x => (x.AccidentID || x.accidentId || x['Mã Hồ Sơ']) === accidentId);
@@ -271,7 +291,6 @@ async function viewAccidentDetail(accidentId) {
     return;
   }
 
-  // Đọc dữ liệu linh hoạt (bảo đảm nhận đúng kể cả khi đổi tên cột)
   const id = item.AccidentID || item.accidentId || item['Mã Hồ Sơ'] || '';
   const empId = item.EmpID || item.empId || item['Mã NV'] || '';
   const rawDate = item.IncidentDate || item.incidentDate || item['Thời Gian'] || '';
@@ -283,7 +302,18 @@ async function viewAccidentDetail(accidentId) {
   const status = item.Status || item.status || item['Trạng Thái'] || 'Mới ghi nhận';
   const attachments = item.Attachments || item.attachments || item.FileDriveUrl || item.files || item['File Đính Kèm'] || '';
 
-  // Xử lý hiển thị đường dẫn File Drive
+  // 2. Tra cứu Họ Tên Nhân Viên từ Mã NV
+  let empFullName = empId; 
+  const empRes = await API.get('getEmployees');
+  if (empRes && empRes.data) {
+    const foundEmp = empRes.data.find(e => (e.EmpID || e.empId || e['Mã NV']) === empId);
+    if (foundEmp) {
+      const fullName = foundEmp.FullName || foundEmp.fullName || foundEmp['Họ và Tên'] || foundEmp['Họ Tên'] || '';
+      empFullName = `${empId} - ${fullName}`;
+    }
+  }
+
+  // 3. Xử lý đường dẫn file
   let fileListHTML = '<span class="text-slate-400 text-xs italic">Không có file đính kèm</span>';
   if (attachments && attachments.toString().trim() !== '') {
     const urls = attachments.toString().split(',');
@@ -300,7 +330,7 @@ async function viewAccidentDetail(accidentId) {
     }).join('');
   }
 
-  // Render Nội dung Modal
+  // 4. Render popup
   detailModal.innerHTML = `
     <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="p-4 border-b flex justify-between items-center bg-slate-50">
@@ -312,7 +342,7 @@ async function viewAccidentDetail(accidentId) {
 
       <div class="p-6 space-y-4 text-sm">
         <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <div><span class="text-xs text-slate-500 font-semibold block">MÃ NHÂN VIÊN</span><span class="font-bold text-slate-800">${empId}</span></div>
+          <div><span class="text-xs text-slate-500 font-semibold block">NGƯỜI BỊ TAI NẠN</span><span class="font-bold text-slate-800">${empFullName}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">TRẠNG THÁI</span><span class="font-semibold text-blue-600">${status}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">THỜI GIAN XẢY RA</span><span>${rawDate ? (isNaN(new Date(rawDate).getTime()) ? rawDate : new Date(rawDate).toLocaleString('vi-VN')) : '--'}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">ĐỊA ĐIỂM</span><span>${location}</span></div>
