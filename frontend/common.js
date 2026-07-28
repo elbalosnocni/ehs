@@ -74,12 +74,28 @@ function loadModule(moduleId) {
   }
 
   // 4. Render màn hình tương ứng
+  const container = document.getElementById('mainContainer');
+
   if (moduleId === 'dashboard') {
-    if (typeof renderDashboardView === 'function') renderDashboardView();
+    if (typeof renderDashboardView === 'function') {
+      renderDashboardView();
+    } else if (typeof DashboardModule !== 'undefined' && DashboardModule.render) {
+      DashboardModule.render(container);
+    }
   } else if (moduleId === 'accident') {
-    if (typeof renderAccidentView === 'function') renderAccidentView();
+    if (typeof renderAccidentView === 'function') {
+      renderAccidentView();
+    } else if (typeof AccidentModule !== 'undefined' && AccidentModule.render) {
+      AccidentModule.render(container);
+    }
+  } else if (moduleId === 'employee') {
+    // ➕ NẠP MÀN HÌNH NGƯỜI LAO ĐỘNG
+    if (typeof EmployeeModule !== 'undefined' && EmployeeModule.render) {
+      EmployeeModule.render(container);
+    } else if (container) {
+      container.innerHTML = `<div class="p-8 text-center text-red-500">Chưa nạp file employee.js hoặc EmployeeModule không tồn tại!</div>`;
+    }
   } else {
-    const container = document.getElementById('mainContainer');
     if (container) {
       container.innerHTML = `<div class="p-8 text-center text-slate-500">Màn hình <b>${activeMenu ? activeMenu.label : ''}</b> đang được phát triển...</div>`;
     }
