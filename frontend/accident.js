@@ -18,7 +18,6 @@ async function loadMasterDropdowns() {
       const select = document.getElementById(elementId);
       if (!select) return;
 
-      // Lấy danh sách giá trị không rỗng và loại bỏ trùng lặp
       const options = masterDataCache
         .map(item => item[masterKey])
         .filter(val => val && val.toString().trim() !== '');
@@ -52,10 +51,7 @@ function openAccidentModal() {
   const preview = document.getElementById('empNamePreview');
   if (preview) preview.innerText = '';
   
-  // Mở Modal trước để thẻ HTML xuất hiện trong DOM
   document.getElementById('accidentModal').classList.remove('hidden');
-  
-  // Tải dữ liệu các ô chọn từ tab MASTER vào Modal
   loadMasterDropdowns();
 }
 
@@ -65,11 +61,9 @@ function closeAccidentModal() {
 
 // 3. RENDER GIAO DIỆN HỒ SƠ TAI NẠN
 async function renderAccidentView() {
-  // Sửa dòng này để nhận diện đúng cột LoaiSuCo-IncidentType từ Google Sheet
-  const type = item['LoaiSuCo-IncidentType'] || item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
+  const container = document.getElementById('mainContainer');
   container.innerHTML = `<div class="text-center py-10 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2">Đang tải danh sách hồ sơ...</p></div>`;
 
-  // Gọi API lấy danh sách tai nạn
   const res = await API.get('getAccidents');
   const accidents = res.data || [];
 
@@ -79,8 +73,10 @@ async function renderAccidentView() {
     const dept = item.BoPhan || item.boPhan || item['Bộ Phận'] || '';
     const rawDate = item.IncidentDate || item.incidentDate || item['Thời Gian'] || '';
     const location = item.Location || item.location || item['Địa Điểm'] || '';
-    const type = item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
-    const severity = item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
+    
+    // Sửa mapping Loại sự cố đúng key trong Sheet
+    const type = item['LoaiSuCo-IncidentType'] || item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
+    const severity = item['Mucdo-Severity'] || item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
     const status = item.TrangThai || item.status || item['Trạng Thái'] || 'Chưa điều tra';
 
     let formattedDate = rawDate;
@@ -223,7 +219,7 @@ async function renderAccidentView() {
               <select id="accJob" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
           </div>
-  
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Trạng Thái Điều Tra</label>
@@ -423,8 +419,8 @@ async function viewAccidentDetail(accidentId) {
   const dept = item.BoPhan || item.boPhan || item['Bộ Phận'] || 'Khác';
   const rawDate = item.IncidentDate || item.incidentDate || item['Thời Gian'] || '';
   const location = item.Location || item.location || item['Địa Điểm'] || '';
-  const type = item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
-  const severity = item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
+  const type = item['LoaiSuCo-IncidentType'] || item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
+  const severity = item['Mucdo-Severity'] || item.Severity || item.severity || item['Mức Độ'] || 'Nhẹ';
   const cause = item.NguyenNhan || item.nguyenNhan || item['Nguyên Nhân'] || 'Chưa cập nhật';
   const factor = item.YeuToChanThuong || item.yeuToChanThuong || item['Yếu Tố Chấn Thương'] || 'Chưa cập nhật';
   const witness = item.Witness || item.witness || item['Người Chứng Kiến'] || 'Không có';
@@ -477,6 +473,8 @@ async function viewAccidentDetail(accidentId) {
           <div><span class="text-xs text-slate-500 font-semibold block">THỜI GIAN XẢY RA</span><span>${rawDate ? (isNaN(new Date(rawDate).getTime()) ? rawDate : new Date(rawDate).toLocaleString('vi-VN')) : '--'}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">ĐỊA ĐIỂM</span><span>${location}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">LOẠI SỰ CỐ</span><span>${type}</span></div>
+          <div><span class="text-xs text-slate-500 font-semibold block">PHÂN LOẠI</span><span>${phanLoai}</span></div>
+          <div><span class="text-xs text-slate-500 font-semibold block">NGHỀ NGHIỆP</span><span>${ngheNghiep}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">NGUYÊN NHÂN</span><span>${cause}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">YẾU TỐ CHẤN THƯƠNG</span><span>${factor}</span></div>
           <div><span class="text-xs text-slate-500 font-semibold block">MỨC ĐỘ</span><span class="font-semibold text-amber-600">${severity}</span></div>
