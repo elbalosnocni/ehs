@@ -1,5 +1,6 @@
 // common.js - Cấu hình API kết nối Google Apps Script
 const API_URL = "https://script.google.com/macros/s/AKfycbydnC46ulhR_fPb6xYGNWZeHOUb3NKCX9JuxZA_jySRXF4dNvFKtA_t0qnDvksLat6XhA/exec";
+
 // Kiểm tra trạng thái Đăng nhập
 const currentUser = JSON.parse(localStorage.getItem('user'));
 if (!currentUser) {
@@ -76,12 +77,20 @@ function loadModule(moduleId) {
   }
 
   // 4. Render màn hình tương ứng
+  const container = document.getElementById('mainContainer');
+
   if (moduleId === 'dashboard') {
     if (typeof renderDashboardView === 'function') renderDashboardView();
   } else if (moduleId === 'accident') {
     if (typeof renderAccidentView === 'function') renderAccidentView();
+  } else if (moduleId === 'employee') {
+    // ✅ Gọi EmployeeModule cho tab Người lao động
+    if (typeof EmployeeModule !== 'undefined' && container) {
+      EmployeeModule.render(container);
+    } else if (container) {
+      container.innerHTML = `<div class="p-8 text-center text-red-500 font-semibold">Chưa nạp file employee.js trong index.html!</div>`;
+    }
   } else {
-    const container = document.getElementById('mainContainer');
     if (container) {
       container.innerHTML = `<div class="p-8 text-center text-slate-500">Màn hình <b>${activeMenu ? activeMenu.label : ''}</b> đang được phát triển...</div>`;
     }
