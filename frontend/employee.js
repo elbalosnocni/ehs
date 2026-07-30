@@ -50,7 +50,7 @@ const EmployeeModule = {
               <tr>
                 <th class="px-4 py-3 text-center w-12">STT</th>
                 <th class="px-4 py-3">Mã NV</th>
-                <th class="px-4 py-3">Họ và Tên</th>
+                <th class="px-4 py-3">Họ tên</th>
                 <th class="px-4 py-3">Nhà máy</th>
                 <th class="px-4 py-3">Bộ phận</th>
                 <th class="px-4 py-3">Chức vụ</th>
