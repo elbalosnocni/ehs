@@ -39,6 +39,8 @@ async function loadMasterDropdowns() {
     populateSelect('accInjuryFactor', 'Yeutochanthuong');
     populateSelect('accStatus', 'TrangThai');
     populateSelect('accSeverity', 'Mucdo-Severity');
+    populateSelect('accCategory', 'Phanloai');
+    populateSelect('accJob', 'Nghenghiep');
 
   } catch (err) {
     console.error("Lỗi khi tải danh mục từ tab MASTER:", err);
@@ -63,7 +65,8 @@ function closeAccidentModal() {
 
 // 3. RENDER GIAO DIỆN HỒ SƠ TAI NẠN
 async function renderAccidentView() {
-  const container = document.getElementById('mainContainer');
+  // Sửa dòng này để nhận diện đúng cột LoaiSuCo-IncidentType từ Google Sheet
+  const type = item['LoaiSuCo-IncidentType'] || item.IncidentType || item.incidentType || item['Loại Sự Cố'] || '';
   container.innerHTML = `<div class="text-center py-10 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2">Đang tải danh sách hồ sơ...</p></div>`;
 
   // Gọi API lấy danh sách tai nạn
@@ -212,6 +215,17 @@ async function renderAccidentView() {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Phân Loại *</label>
+              <select id="accCategory" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Nghề Nghiệp / Chức Danh</label>
+              <select id="accJob" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
+            </div>
+          </div>
+  
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Trạng Thái Điều Tra</label>
               <select id="accStatus" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
@@ -344,6 +358,8 @@ async function handleSaveAccident(e) {
     trangThai: document.getElementById('accStatus').value,
     witness: document.getElementById('accWitness').value,
     description: document.getElementById('accDesc').value,
+    phanLoai: document.getElementById('accCategory') ? document.getElementById('accCategory').value : '',
+    ngheNghiep: document.getElementById('accJob') ? document.getElementById('accJob').value : '',
     files: filesData,
     userId: typeof currentUser !== 'undefined' && currentUser ? currentUser.userId : ''
   };
@@ -412,6 +428,8 @@ async function viewAccidentDetail(accidentId) {
   const cause = item.NguyenNhan || item.nguyenNhan || item['Nguyên Nhân'] || 'Chưa cập nhật';
   const factor = item.YeuToChanThuong || item.yeuToChanThuong || item['Yếu Tố Chấn Thương'] || 'Chưa cập nhật';
   const witness = item.Witness || item.witness || item['Người Chứng Kiến'] || 'Không có';
+  const phanLoai = item.Phanloai || item.phanLoai || item['Phân Loại'] || 'Chưa có';
+  const ngheNghiep = item.Nghenghiep || item.ngheNghiep || item['Nghề Nghiệp'] || 'Chưa có';
   const desc = item.Description || item.description || item['Mô Tả'] || 'Không có mô tả';
   const status = item.TrangThai || item.status || item['Trạng Thái'] || 'Chưa điều tra';
   const attachments = item.Attachments || item.attachments || item.FileDriveUrl || item.files || item['File Đính Kèm'] || '';
