@@ -239,7 +239,7 @@ async function checkEmployeeName(empId) {
       const fullName = emp.FullName || emp.fullName || emp['Họ và Tên'] || emp['Họ Tên'] || '';
       const dept = emp.Department || emp.department || emp['Bộ phận'] || emp['Bộ Phận'] || '';
       
-      previewEl.innerText = `✓ Họ tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
+      previewEl.innerText = `✓ Họ Tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
       previewEl.className = "text-xs font-semibold text-emerald-600 mt-1 block";
       
       // Tự động điền bộ phận nếu có
