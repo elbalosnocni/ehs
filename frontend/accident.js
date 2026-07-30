@@ -1,3 +1,67 @@
+// Variable lưu bộ nhớ tạm dữ liệu MASTER
+let masterDataCache = null;
+
+// 1. TẢI ĐỘNG CÁC DROPDOWN TỪ TAB MASTER
+async function loadMasterDropdowns() {
+  try {
+    if (!masterDataCache) {
+      const res = await API.get('getMasterData');
+      if (res && res.data) {
+        masterDataCache = res.data;
+      }
+    }
+
+    if (!masterDataCache) return;
+
+    // Tách danh sách theo các cột trong tab MASTER
+    const populateSelect = (elementId, masterKey) => {
+      const select = document.getElementById(elementId);
+      if (!select) return;
+
+      // Lấy danh sách giá trị không rỗng và loại bỏ trùng lặp
+      const options = masterDataCache
+        .map(item => item[masterKey])
+        .filter(val => val && val.toString().trim() !== '');
+      
+      const uniqueOptions = [...new Set(options)];
+
+      if (uniqueOptions.length > 0) {
+        select.innerHTML = uniqueOptions
+          .map(opt => `<option value="${opt}">${opt}</option>`)
+          .join('');
+      }
+    };
+
+    // Ánh xạ id thẻ <select> trong HTML với Tên Cột trong tab MASTER
+    populateSelect('accDepartment', 'BoPhan');
+    populateSelect('accType', 'LoaiSuCo-IncidentType');
+    populateSelect('accCause', 'Nguyennhan');
+    populateSelect('accInjuryFactor', 'Yeutochanthuong');
+    populateSelect('accStatus', 'TrangThai');
+    populateSelect('accSeverity', 'Mucdo-Severity');
+
+  } catch (err) {
+    console.error("Lỗi khi tải danh mục từ tab MASTER:", err);
+  }
+}
+
+// 2. MỞ / ĐÓNG MODAL
+function openAccidentModal() {
+  const preview = document.getElementById('empNamePreview');
+  if (preview) preview.innerText = '';
+  
+  // Mở Modal trước để thẻ HTML xuất hiện trong DOM
+  document.getElementById('accidentModal').classList.remove('hidden');
+  
+  // Tải dữ liệu các ô chọn từ tab MASTER vào Modal
+  loadMasterDropdowns();
+}
+
+function closeAccidentModal() {
+  document.getElementById('accidentModal').classList.add('hidden');
+}
+
+// 3. RENDER GIAO DIỆN HỒ SƠ TAI NẠN
 async function renderAccidentView() {
   const container = document.getElementById('mainContainer');
   container.innerHTML = `<div class="text-center py-10 text-slate-500"><i class="fa-solid fa-spinner fa-spin text-2xl"></i><p class="mt-2">Đang tải danh sách hồ sơ...</p></div>`;
@@ -109,7 +173,7 @@ async function renderAccidentView() {
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Bộ Phận / Xưởng *</label>
-              <input type="text" id="accDepartment" required placeholder="Nhập hoặc tự động điền từ NV" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <select id="accDepartment" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
           </div>
 
@@ -127,55 +191,29 @@ async function renderAccidentView() {
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Loại Sự Cố *</label>
-              <select id="accType" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Tai nạn lao động nghỉ việc">Tai nạn lao động nghỉ việc</option>
-                <option value="Tai nạn sơ cứu">Tai nạn sơ cứu</option>
-                <option value="Sự cố suýt giật (Near Miss)">Sự cố suýt giật (Near Miss)</option>
-                <option value="Sự cố hỏng hóc tài sản">Sự cố hỏng hóc tài sản</option>
-              </select>
+              <select id="accType" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Mức Độ Nghiêm Trọng</label>
-              <select id="accSeverity" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Nhẹ">Nhẹ</option>
-                <option value="Trung bình">Trung bình</option>
-                <option value="Nghiêm trọng">Nghiêm trọng</option>
-                <option value="Rất nghiêm trọng">Rất nghiêm trọng</option>
-              </select>
+              <select id="accSeverity" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
           </div>
 
-          <!-- BỔ SUNG CÁC TRƯỜNG DỮ LIỆU BÁO CÁO MỚI -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Nguyên Nhân Sự Cố *</label>
-              <select id="accCause" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Do NLĐ">Do Người lao động (Thao tác sai, vi phạm QT...)</option>
-                <option value="Do người SDLĐ">Do Người sử dụng lao động (Thiết bị lỗi, BOHL thiếu...)</option>
-                <option value="Khách quan khó tránh">Khách quan khó tránh (Thiên tai, môi trường...)</option>
-              </select>
+              <select id="accCause" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Yếu Tố Chấn Thương *</label>
-              <select id="accInjuryFactor" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Vật rơi, đổ, sập">Vật rơi, đổ, sập</option>
-                <option value="Thiết bị nâng">Thiết bị nâng / cẩu</option>
-                <option value="Thiết bị áp lực">Thiết bị áp lực / Điện</option>
-                <option value="Hóa chất / Môi trường">Hóa chất / Môi trường</option>
-                <option value="Khác">Yếu tố khác</option>
-              </select>
+              <select id="accInjuryFactor" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Trạng Thái Điều Tra</label>
-              <select id="accStatus" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="Chưa điều tra">Chưa điều tra</option>
-                <option value="Đang điều tra">Đang điều tra</option>
-                <option value="Chờ BHXH">Chờ BHXH</option>
-                <option value="Hoàn tất">Hoàn tất</option>
-              </select>
+              <select id="accStatus" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></select>
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 mb-1">Người Chứng Kiến</label>
@@ -205,10 +243,10 @@ async function renderAccidentView() {
   document.getElementById('accidentForm').addEventListener('submit', handleSaveAccident);
 }
 
-// Kiểm tra tên NV khi nhập Mã NV trong Form & tự chọn Bộ phận
+// Tra cứu NV
 async function checkEmployeeName(empId) {
   const previewEl = document.getElementById('empNamePreview');
-  const deptInput = document.getElementById('accDepartment');
+  const deptSelect = document.getElementById('accDepartment');
   if (!previewEl) return;
 
   const cleanEmpId = empId.toString().trim().toUpperCase();
@@ -242,9 +280,8 @@ async function checkEmployeeName(empId) {
       previewEl.innerText = `✓ Họ Tên: ${fullName} ${dept ? '(' + dept + ')' : ''}`;
       previewEl.className = "text-xs font-semibold text-emerald-600 mt-1 block";
       
-      // Tự động điền bộ phận nếu có
-      if (deptInput && dept) {
-        deptInput.value = dept;
+      if (deptSelect && dept) {
+        deptSelect.value = dept;
       }
     } else {
       previewEl.innerText = '⚠️ Không tìm thấy Mã NV trong hệ thống!';
@@ -275,16 +312,6 @@ function getStatusBadge(status) {
   }
 }
 
-function openAccidentModal() {
-  const preview = document.getElementById('empNamePreview');
-  if (preview) preview.innerText = '';
-  document.getElementById('accidentModal').classList.remove('hidden');
-}
-
-function closeAccidentModal() {
-  document.getElementById('accidentModal').classList.add('hidden');
-}
-
 async function handleSaveAccident(e) {
   e.preventDefault();
   const btn = document.getElementById('saveAccidentBtn');
@@ -305,7 +332,6 @@ async function handleSaveAccident(e) {
     }
   }
 
-  // Payload mở rộng bổ sung các trường báo cáo mới
   const payload = {
     empId: document.getElementById('accEmpId').value,
     boPhan: document.getElementById('accDepartment').value,
@@ -390,7 +416,6 @@ async function viewAccidentDetail(accidentId) {
   const status = item.TrangThai || item.status || item['Trạng Thái'] || 'Chưa điều tra';
   const attachments = item.Attachments || item.attachments || item.FileDriveUrl || item.files || item['File Đính Kèm'] || '';
 
-  // Tra cứu Họ Tên Nhân Viên
   let empFullName = empId; 
   const empRes = await API.get('getEmployees');
   if (empRes && empRes.data) {
@@ -401,7 +426,6 @@ async function viewAccidentDetail(accidentId) {
     }
   }
 
-  // File đính kèm
   let fileListHTML = '<span class="text-slate-400 text-xs italic">Không có file đính kèm</span>';
   if (attachments && attachments.toString().trim() !== '') {
     const urls = attachments.toString().split(',');
@@ -418,7 +442,6 @@ async function viewAccidentDetail(accidentId) {
     }).join('');
   }
 
-  // Popup chi tiết
   detailModal.innerHTML = `
     <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
       <div class="p-4 border-b flex justify-between items-center bg-slate-50 sticky top-0 z-10">
