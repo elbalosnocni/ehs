@@ -50,7 +50,7 @@ const EmployeeModule = {
               <tr>
                 <th class="px-4 py-3 text-center w-12">STT</th>
                 <th class="px-4 py-3">Mã NV</th>
-                <th class="px-4 py-3">Họ tên</th>
+                <th class="px-4 py-3">Họ Tên</th>
                 <th class="px-4 py-3">Nhà máy</th>
                 <th class="px-4 py-3">Bộ phận</th>
                 <th class="px-4 py-3">Chức vụ</th>
@@ -105,7 +105,7 @@ const EmployeeModule = {
         <tr class="hover:bg-slate-50 transition">
           <td class="px-4 py-2.5 text-center font-medium text-slate-500">${index + 1}</td>
           <td class="px-4 py-2.5 font-bold text-slate-800">${emp['Mã NV'] || emp.id || '--'}</td>
-          <td class="px-4 py-2.5 font-medium text-blue-700">${emp['Họ tên'] || emp.name || '--'}</td>
+          <td class="px-4 py-2.5 font-medium text-blue-700">${emp['Họ Tên'] || emp.name || '--'}</td>
           <td class="px-4 py-2.5">${emp['Nhà máy'] || emp.factory || '--'}</td>
           <td class="px-4 py-2.5">${emp['Bộ phận'] || emp.department || '--'}</td>
           <td class="px-4 py-2.5">${emp['Chức vụ'] || emp.position || '--'}</td>
