@@ -16,10 +16,10 @@ const EmployeeModule = {
           </div>
           
           <!-- Nút Tải File Excel Mẫu -->
-          <a href="mau_danh_sach_nhan_vien_ehs.xlsx" download class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 flex items-center gap-2 transition w-fit">
+          <button onclick="EmployeeModule.downloadTemplate()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 flex items-center gap-2 transition w-fit cursor-pointer">
             <i class="fa-solid fa-download text-slate-500"></i>
             Tải File Excel Mẫu
-          </a>
+          </button>
         </div>
 
         <!-- KHU VỰC UPLOAD EXCEL -->
@@ -104,11 +104,11 @@ const EmployeeModule = {
       html += `
         <tr class="hover:bg-slate-50 transition">
           <td class="px-4 py-2.5 text-center font-medium text-slate-500">${index + 1}</td>
-          <td class="px-4 py-2.5 font-bold text-slate-800">${emp['Mã NV'] || emp.id || '--'}</td>
-          <td class="px-4 py-2.5 font-medium text-blue-700">${emp['Họ và Tên'] || emp.name || '--'}</td>
-          <td class="px-4 py-2.5">${emp['Nhà máy'] || emp.factory || '--'}</td>
-          <td class="px-4 py-2.5">${emp['Bộ phận'] || emp.department || '--'}</td>
-          <td class="px-4 py-2.5">${emp['Chức vụ'] || emp.position || '--'}</td>
+          <td class="px-4 py-2.5 font-bold text-slate-800">${emp['Mã NV'] || emp.EmpID || emp.id || '--'}</td>
+          <td class="px-4 py-2.5 font-medium text-blue-700">${emp['Họ Tên'] || emp['Họ và Tên'] || emp['Họ tên'] || emp.FullName || emp.name || '--'}</td>
+          <td class="px-4 py-2.5">${emp['Nhà máy'] || emp.Plant || emp.factory || '--'}</td>
+          <td class="px-4 py-2.5">${emp['Bộ phận'] || emp.Department || emp.department || '--'}</td>
+          <td class="px-4 py-2.5">${emp['Chức vụ'] || emp.Position || emp.position || '--'}</td>
           <td class="px-4 py-2.5 text-center">${emp['Năm sinh'] || emp.yob || '--'}</td>
         </tr>
       `;
@@ -181,5 +181,40 @@ const EmployeeModule = {
     };
 
     reader.readAsArrayBuffer(file);
+  },
+
+  // 5. Tạo và Tải file Excel mẫu chuẩn trực tiếp
+  downloadTemplate() {
+    try {
+      const templateData = [
+        {
+          "Mã NV": "NV001",
+          "Họ Tên": "Nguyễn Văn A",
+          "Nhà máy": "Nhà máy 1",
+          "Bộ phận": "Sản xuất",
+          "Chức vụ": "Công nhân",
+          "Năm sinh": 1995
+        },
+        {
+          "Mã NV": "NV002",
+          "Họ Tên": "Trần Thị B",
+          "Nhà máy": "Nhà máy 2",
+          "Bộ phận": "Hành chính",
+          "Chức vụ": "Nhân viên",
+          "Năm sinh": 1998
+        }
+      ];
+
+      // Tạo Workbook và Sheet Excel từ thư viện XLSX
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "EMPLOYEE");
+
+      // Xuất file .xlsx về máy
+      XLSX.writeFile(workbook, "mau_danh_sach_nhan_vien_ehs.xlsx");
+    } catch (err) {
+      console.error(err);
+      alert('Không thể tạo file Excel mẫu! Vui lòng kiểm tra xem thư viện SheetJS (XLSX) đã được nạp trong index.html chưa.');
+    }
   }
 };
