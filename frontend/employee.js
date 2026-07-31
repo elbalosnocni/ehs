@@ -189,7 +189,7 @@ const EmployeeModule = {
       const templateData = [
         {
           "Mã NV": "NV001",
-          "Họ Tên": "Nguyễn Văn A",
+          "Họ và Tên": "Nguyễn Văn A",
           "Nhà máy": "Nhà máy 1",
           "Bộ phận": "Sản xuất",
           "Chức vụ": "Công nhân",
@@ -197,7 +197,7 @@ const EmployeeModule = {
         },
         {
           "Mã NV": "NV002",
-          "Họ Tên": "Trần Thị B",
+          "Họ và Tên": "Trần Thị B",
           "Nhà máy": "Nhà máy 2",
           "Bộ phận": "Hành chính",
           "Chức vụ": "Nhân viên",
