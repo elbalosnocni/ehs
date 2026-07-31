@@ -2,10 +2,20 @@ const API = {
   // Gửi request POST đến Backend
   post: async function(action, data = {}) {
     try {
+      let payload = {};
+
+      // Kiểm tra nếu tham số thứ nhất truyền vào là 1 Object (như trong employee.js)
+      if (typeof action === 'object' && action !== null) {
+        payload = action;
+      } else {
+        // Nếu truyền 2 tham số riêng biệt: API.post('importEmployees', { ... })
+        payload = { action: action, ...data };
+      }
+
       const response = await fetch(CONFIG.API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: action, ...data })
+        body: JSON.stringify(payload)
       });
       return await response.json();
     } catch (error) {
