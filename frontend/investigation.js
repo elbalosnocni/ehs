@@ -6,7 +6,7 @@ async function initInvestigationModule() {
   await loadCapaData();
 }
 
-// Render khung giao diện chuẩn từ HTML bạn cung cấp
+// Render khung giao diện
 function renderInvestigationLayout() {
   const mainContent = document.getElementById("main-content") || document.body;
   mainContent.innerHTML = `
@@ -94,16 +94,69 @@ function renderInvestigationLayout() {
         </div>
       </div>
     </div>
+
+    <!-- Modal Tạo / Chỉnh sửa CAPA -->
+    <div class="modal fade" id="capaModal" tabindex="-1">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="capaModalTitle">Tạo phiếu CAPA mới</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="capaForm">
+              <input type="hidden" id="capaId">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Mã sự cố liên quan</label>
+                  <input type="text" class="form-control" id="accidentId" placeholder="VD: ACC-2026-001">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Người phụ trách</label>
+                  <input type="text" class="form-control" id="assignee" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Nguyên nhân gốc rễ (Root Cause)</label>
+                  <textarea class="form-control" id="rootCause" rows="2"></textarea>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Hành động khắc phục / Phòng ngừa (CAPA)</label>
+                  <textarea class="form-control" id="action" rows="2" required></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Hạn chót (Deadline)</label>
+                  <input type="date" class="form-control" id="deadline" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Tiến độ (%)</label>
+                  <input type="number" class="form-control" id="progress" min="0" max="100" value="0">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Trạng thái</label>
+                  <select class="form-select" id="status">
+                    <option value="Đang thực hiện">Đang thực hiện</option>
+                    <option value="Hoàn thành">Hoàn thành</option>
+                  </select>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary" onclick="saveCapa()">Lưu phiếu</button>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 }
 
 // Load dữ liệu từ Apps Script
 async function loadCapaData() {
   try {
-    // API call qua api.js hiện có của bạn
     const res = await fetchApi({ action: "getInvestigationData" });
-    if (res.status === "success") {
-      capaData = res.data;
+    if (res && res.status === "success") {
+      capaData = res.data || [];
       renderCapaTable(capaData);
       updateKPIs(capaData);
     }
@@ -118,13 +171,13 @@ function renderCapaTable(data) {
   const today = new Date().toISOString().split("T")[0];
 
   if (!data || data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Không có dữ liệu</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">Không có dữ liệu CAPA nào</td></tr>`;
     return;
   }
 
   tbody.innerHTML = data.map(item => {
     const isOverdue = item.deadline && item.deadline < today && item.status !== "Hoàn thành";
-    
+
     let statusBadge = `<span class="badge bg-secondary">${item.status}</span>`;
     if (item.status === "Hoàn thành") statusBadge = `<span class="badge bg-success">Hoàn thành</span>`;
     else if (isOverdue) statusBadge = `<span class="badge bg-danger">Quá hạn</span>`;
@@ -143,7 +196,7 @@ function renderCapaTable(data) {
             <div class="progress flex-grow-1" style="height:6px;">
               <div class="progress-bar ${item.progress == 100 ? 'bg-success' : 'bg-primary'}" style="width: ${item.progress}%"></div>
             </div>
-            <small class="text-muted">${item.progress}%</small>
+            <small class="text-muted">${item.progress || 0}%</small>
           </div>
         </td>
         <td>${statusBadge}</td>
@@ -155,7 +208,7 @@ function renderCapaTable(data) {
   }).join('');
 }
 
-// Cập nhật thẻ KPI
+// Cập nhật các chỉ số KPI
 function updateKPIs(data) {
   const today = new Date().toISOString().split("T")[0];
   const total = data.length;
@@ -170,7 +223,7 @@ function updateKPIs(data) {
   document.getElementById("kpiRate").innerText = rate + "%";
 }
 
-// Lọc dữ liệu client-side
+// Bộ lọc nâng cao
 function filterCapaTable() {
   const search = document.getElementById("filterSearch").value.toLowerCase();
   const status = document.getElementById("filterStatus").value;
@@ -178,10 +231,10 @@ function filterCapaTable() {
   const today = new Date().toISOString().split("T")[0];
 
   const filtered = capaData.filter(item => {
-    const matchesSearch = item.id.toLowerCase().includes(search) || 
+    const matchesSearch = (item.id && item.id.toLowerCase().includes(search)) || 
                           (item.accidentId && item.accidentId.toLowerCase().includes(search)) ||
                           (item.assignee && item.assignee.toLowerCase().includes(search));
-    
+
     let isOverdue = item.deadline && item.deadline < today && item.status !== "Hoàn thành";
     let matchesStatus = true;
     if (status === "Quá hạn") matchesStatus = isOverdue;
@@ -201,4 +254,58 @@ function resetFilters() {
   document.getElementById("filterStatus").value = "";
   document.getElementById("filterDate").value = "";
   renderCapaTable(capaData);
+}
+
+// Modal Mở/Sửa
+function openCapaModal() {
+  document.getElementById("capaForm").reset();
+  document.getElementById("capaId").value = "";
+  document.getElementById("capaModalTitle").innerText = "Tạo phiếu CAPA mới";
+  new bootstrap.Modal(document.getElementById("capaModal")).show();
+}
+
+function editCapa(id) {
+  const item = capaData.find(i => i.id === id);
+  if (!item) return;
+
+  document.getElementById("capaId").value = item.id;
+  document.getElementById("accidentId").value = item.accidentId || "";
+  document.getElementById("assignee").value = item.assignee || "";
+  document.getElementById("rootCause").value = item.rootCause || "";
+  document.getElementById("action").value = item.action || "";
+  document.getElementById("deadline").value = item.deadline || "";
+  document.getElementById("progress").value = item.progress || 0;
+  document.getElementById("status").value = item.status || "Đang thực hiện";
+
+  document.getElementById("capaModalTitle").innerText = "Chỉnh sửa phiếu CAPA";
+  new bootstrap.Modal(document.getElementById("capaModal")).show();
+}
+
+// Lưu dữ liệu CAPA (Thêm mới hoặc Cập nhật)
+async function saveCapa() {
+  const payload = {
+    action: "saveCapaData",
+    data: {
+      id: document.getElementById("capaId").value,
+      accidentId: document.getElementById("accidentId").value,
+      assignee: document.getElementById("assignee").value,
+      rootCause: document.getElementById("rootCause").value,
+      action: document.getElementById("action").value,
+      deadline: document.getElementById("deadline").value,
+      progress: Number(document.getElementById("progress").value),
+      status: document.getElementById("status").value
+    }
+  };
+
+  try {
+    const res = await fetchApi(payload);
+    if (res.status === "success") {
+      bootstrap.Modal.getInstance(document.getElementById("capaModal")).hide();
+      await loadCapaData();
+    } else {
+      alert("Lỗi khi lưu dữ liệu: " + (res.message || "Chưa rõ lý do"));
+    }
+  } catch (err) {
+    console.error("Lỗi gửi dữ liệu:", err);
+  }
 }
