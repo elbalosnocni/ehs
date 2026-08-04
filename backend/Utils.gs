@@ -49,3 +49,6 @@ const Utils = {
     this.appendRow(CONFIG.SHEETS.LOG, [logId, userId, action, timestamp, JSON.stringify(details)]);
   }
 };
+function testDrivePermission() {
+  DriveApp.getRootFolder();
+}
