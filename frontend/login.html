@@ -4,9 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Đăng nhập - EHS Manager</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* THANH NAV TABS MỚI */
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      background: #fff;
+      color: #334155;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid #e5e7eb;
+      transition: .25s;
+    }
+    
+    .nav-tab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,.12);
+      color: #2563eb;
+    }
+    
+    .nav-tab.active {
+      background: linear-gradient(135deg,#2563eb,#1e40af);
+      color: #fff;
+      border: none;
+    } 
+  </style>
 </head>
-<body class="bg-slate-100 flex items-center justify-center h-screen">
+<body class="bg-slate-100 min-h-screen flex flex-col items-center justify-center p-4">
+
+  <!-- THANH TAB TRUY CẬP CÁC TRANG -->
+  <div class="nav-tabs">
+    <a href="https://bangchamcong.pages.dev" target="_blank" class="nav-tab">📋 Chấm Công</a>
+    <a href="https://noiquy.pages.dev" target="_blank" class="nav-tab">📜 Nội Quy</a>
+    <a href="https://bhxh.pages.dev" target="_blank" class="nav-tab">🏥 BHXH</a>
+    <a href="#" class="nav-tab active">🛡️ An Toàn</a>
+  </div>
+      
+  <!-- FORM ĐĂNG NHẬP -->
   <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
     <h2 class="text-2xl font-bold text-center text-slate-800 mb-6">ĐĂNG NHẬP EHS MANAGER</h2>
     <form id="loginForm" class="space-y-4">
@@ -35,20 +83,26 @@
       btn.disabled = true;
       msg.innerText = "";
 
-      const res = await API.post('login', {
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value
-      });
+      try {
+        const res = await API.post('login', {
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value
+        });
 
-      if (res.status === 'success') {
-        msg.className = "text-center text-sm mt-2 text-green-600";
-        msg.innerText = "Đăng nhập thành công!";
-        localStorage.setItem('user', JSON.stringify(res.user));
-        // Chuyển hướng sang trang Dashboard
-        setTimeout(() => window.location.href = 'index.html', 1000);
-      } else {
+        if (res.status === 'success') {
+          msg.className = "text-center text-sm mt-2 text-green-600";
+          msg.innerText = "Đăng nhập thành công!";
+          localStorage.setItem('user', JSON.stringify(res.user));
+          setTimeout(() => window.location.href = 'index.html', 1000);
+        } else {
+          msg.className = "text-center text-sm mt-2 text-red-600";
+          msg.innerText = res.message || "Đăng nhập thất bại!";
+          btn.innerText = "Đăng nhập";
+          btn.disabled = false;
+        }
+      } catch (err) {
         msg.className = "text-center text-sm mt-2 text-red-600";
-        msg.innerText = res.message || "Đăng nhập thất bại!";
+        msg.innerText = "Lỗi kết nối máy chủ!";
         btn.innerText = "Đăng nhập";
         btn.disabled = false;
       }
