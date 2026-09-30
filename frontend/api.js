@@ -1,37 +1,7 @@
-const API = {
-  // Gửi request POST đến Backend
-  post: async function(action, data = {}) {
-    try {
-      let payload = {};
-
-      // Kiểm tra nếu tham số thứ nhất truyền vào là 1 Object (như trong employee.js)
-      if (typeof action === 'object' && action !== null) {
-        payload = action;
-      } else {
-        // Nếu truyền 2 tham số riêng biệt: API.post('importEmployees', { ... })
-        payload = { action: action, ...data };
-      }
-
-      const response = await fetch(CONFIG.API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload)
-      });
-      return await response.json();
-    } catch (error) {
-      console.error("API Post Error:", error);
-      return { status: "error", message: "Lỗi kết nối Server!" };
-    }
-  },
-
-  // Gửi request GET đến Backend
-  get: async function(action) {
-    try {
-      const response = await fetch(`${CONFIG.API_URL}?action=${action}`);
-      return await response.json();
-    } catch (error) {
-      console.error("API Get Error:", error);
-      return { status: "error", message: "Lỗi kết nối Server!" };
-    }
-  }
+const API={
+  async post(action,data={}){const payload=typeof action==='object'?action:Object.assign({action},data);const user=JSON.parse(localStorage.getItem('ehs_user')||'null');if(user?.token&&!payload.token)payload.token=user.token;try{const r=await fetch(CONFIG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});const j=await r.json();if(j.code==='SESSION_EXPIRED'){localStorage.removeItem('ehs_user');location.href='login.html';}return j;}catch(e){console.error(e);return{status:'error',message:'Không kết nối được máy chủ EHS.'};}},
+  async get(action,params={}){return this.post(action,params)}
 };
+const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const fmtDate=v=>{if(!v)return'';const d=new Date(v);return isNaN(d)?esc(v):d.toLocaleString('vi-VN',{hour12:false});};
+const toast=(msg,type='info')=>{const el=document.getElementById('toast');if(!el)return;el.className='fixed top-4 right-4 z-[100] px-4 py-3 rounded-xl shadow-xl text-sm font-semibold '+(type==='error'?'bg-red-600 text-white':type==='success'?'bg-emerald-600 text-white':'bg-slate-900 text-white');el.textContent=msg;el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),3500)};

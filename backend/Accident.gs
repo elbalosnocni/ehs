@@ -1,71 +1,7 @@
-/**
- * ACCIDENT.GS - Quản lý Hồ sơ Tai nạn
- */
 const Accident = {
-  // Lấy danh sách tai nạn
-  getAll: function() {
-    const accidents = Utils.getSheetData(CONFIG.SHEETS.ACCIDENT);
-    return Utils.responseJSON({ status: "success", data: accidents });
-  },
-
-  // Tạo báo cáo tai nạn mới
-  create: function(payload) {
-    try {
-      const accidentId = Utils.generateID("TNLĐ", CONFIG.SHEETS.ACCIDENT, "AccidentID");
-      const timestamp = new Date().toISOString();
-
-      const newRow = [
-        accidentId,
-        payload.empId || "",
-        payload.incidentDate || timestamp,
-        payload.location || "",
-        payload.incidentType || "",
-        payload.severity || "",
-        payload.description || "",
-        payload.witness || "",
-        "Mới ghi nhận" // Trạng thái ban đầu
-      ];
-
-      Utils.appendRow(CONFIG.SHEETS.ACCIDENT, newRow);
-
-      // Nếu có đính kèm file (Base64)
-      if (payload.files && payload.files.length > 0) {
-        this.saveAttachments(accidentId, payload.files);
-      }
-
-      Utils.writeLog(payload.userId || "SYSTEM", "CREATE_ACCIDENT", { accidentId: accidentId });
-
-      return Utils.responseJSON({
-        status: "success",
-        message: "Tạo hồ sơ tai nạn thành công!",
-        accidentId: accidentId
-      });
-    } catch (error) {
-      return Utils.responseJSON({ status: "error", message: error.toString() });
-    }
-  },
-
-  // Lưu file đính kèm lên Google Drive
-  saveAttachments: function(targetId, files) {
-    const folder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
-    files.forEach(fileData => {
-      const blob = Utilities.newBlob(
-        Utilities.base64Decode(fileData.base64), 
-        fileData.mimeType, 
-        fileData.fileName
-      );
-      const file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-      const fileId = "FILE-" + new Date().getTime();
-      Utils.appendRow(CONFIG.SHEETS.ATTACHMENT, [
-        fileId,
-        targetId,
-        "ACCIDENT",
-        file.getUrl(),
-        fileData.mimeType,
-        file.getId()
-      ]);
-    });
-  }
+  getAll:function(payload){ const s=Utils.requireAuth(payload.token); let data=Utils.safeRows(Utils.getSheetData(CONFIG.SHEETS.ACCIDENT)); if(payload.search){const q=String(payload.search).toLowerCase();data=data.filter(r=>Object.values(r).join(' ').toLowerCase().includes(q));} if(payload.status)data=data.filter(r=>String(r.Status)===String(payload.status)); return Utils.ok({data:data,files:data.map(r=>({accidentId:r.AccidentID,files:Utils.listFiles(r.AccidentID)}))}); },
+  getOne:function(payload){ const s=Utils.requireAuth(payload.token); const rows=Utils.getSheetData(CONFIG.SHEETS.ACCIDENT); const r=rows.find(x=>String(x.AccidentID)===String(payload.accidentId)); if(!r)throw new Error('Không tìm thấy hồ sơ tai nạn.'); return Utils.ok({data:Utils.safeRows([r])[0],timeline:Utils.safeRows(Utils.getSheetData(CONFIG.SHEETS.ACCIDENT_TIMELINE).filter(x=>String(x.AccidentID)===String(payload.accidentId))),files:Utils.listFiles(payload.accidentId)}); },
+  create:function(payload){ const s=Utils.requireAuth(payload.token,[CONFIG.ROLES.ADMIN,CONFIG.ROLES.HR,CONFIG.ROLES.HSE,CONFIG.ROLES.MANAGER]); const p=payload.data||payload; const id=Utils.generateId('TNLĐ',CONFIG.SHEETS.ACCIDENT,'AccidentID'); const now=new Date(); const emp=Utils.getSheetData(CONFIG.SHEETS.EMPLOYEE).find(e=>String(e.EmpID)===String(p.empId||p.EmpID)); const o={AccidentID:id,EmpID:p.empId||p.EmpID||'',FullName:p.fullName||p.FullName||(emp&&emp.FullName)||'',Department:p.department||p.Department||(emp&&emp.Department)||'',Plant:p.plant||p.Plant||(emp&&emp.Plant)||'',Position:p.position||p.Position||(emp&&emp.Position)||'',Shift:p.shift||'',IncidentDate:p.incidentDate||now,ReportDate:p.reportDate||now,Location:p.location||'',IncidentType:p.incidentType||'',Classification:p.classification||'',Severity:p.severity||'',InjuryType:p.injuryType||'',BodyPart:p.bodyPart||'',InjuryFactor:p.injuryFactor||'',ImmediateCause:p.immediateCause||'',RootCause:p.rootCause||'',Witness:p.witness||'',Description:p.description||'',InitialAction:p.initialAction||'',MedicalRequired:p.medicalRequired||'',Hospital:p.hospital||'',LostDays:Number(p.lostDays||0),LostTime:p.lostTime||'',Status:'Mới ghi nhận',InvestigationStatus:'Chưa điều tra',CAPAStatus:'Chưa có CAPA',CreatedBy:s.userId,CreatedDate:now,UpdatedBy:s.userId,UpdatedDate:now}; Utils.appendObject(CONFIG.SHEETS.ACCIDENT,o); this.addTimeline({token:payload.token,accidentId:id,eventType:'CREATED',eventTime:now,description:'Tạo hồ sơ tai nạn',actor:s.userId}); if(p.files&&p.files.length){Utils.saveFiles(id,'ACCIDENT',p.files,s);} Utils.writeAudit(s,'CREATE','ACCIDENT',id,null,o,'SUCCESS',''); return Utils.ok({accidentId:id},'Tạo hồ sơ tai nạn thành công.'); },
+  update:function(payload){ const s=Utils.requireAuth(payload.token,[CONFIG.ROLES.ADMIN,CONFIG.ROLES.HR,CONFIG.ROLES.HSE,CONFIG.ROLES.MANAGER]); const id=String(payload.accidentId||payload.data?.AccidentID||''); if(!id)throw new Error('Thiếu AccidentID.'); const p=payload.data||payload; const patch=Object.assign({},p,{UpdatedBy:s.userId,UpdatedDate:new Date()}); delete patch.token;delete patch.action;delete patch.accidentId; const result=Utils.updateObject(CONFIG.SHEETS.ACCIDENT,id,'AccidentID',patch); if(p.files&&p.files.length)Utils.saveFiles(id,'ACCIDENT',p.files,s); Utils.addTimeline({token:payload.token,accidentId:id,eventType:'UPDATED',eventTime:new Date(),description:p.updateNote||'Cập nhật hồ sơ',actor:s.userId}); Utils.writeAudit(s,'UPDATE','ACCIDENT',id,result.old,result.new,'SUCCESS',''); return Utils.ok({},'Đã cập nhật hồ sơ.'); },
+  addTimeline:function(payload){ const s=Utils.requireAuth(payload.token,[CONFIG.ROLES.ADMIN,CONFIG.ROLES.HR,CONFIG.ROLES.HSE,CONFIG.ROLES.MANAGER]); const id=Utils.generateId('TL',CONFIG.SHEETS.ACCIDENT_TIMELINE,'TimelineID'); const o={TimelineID:id,AccidentID:payload.accidentId,EventTime:payload.eventTime||new Date(),EventType:payload.eventType||'NOTE',Description:payload.description||'',Actor:payload.actor||s.userId,CreatedDate:new Date()}; Utils.appendObject(CONFIG.SHEETS.ACCIDENT_TIMELINE,o); Utils.writeAudit(s,'CREATE','ACCIDENT_TIMELINE',id,null,o,'SUCCESS',''); return Utils.ok({timelineId:id}); }
 };
