@@ -1,5 +1,8 @@
 const CONFIG = {
-  VERSION: '2.0.0',
+  VERSION: '3.0.0',
+  DEPLOYMENT_MODE: 'HYBRID',
+  SCOPE_MODE: 'MULTI',
+  RETENTION_YEARS: 10,
   SPREADSHEET_ID: '',
   DRIVE_FOLDER_ID: '1reoBkxi7rlUoQvfP6erEMBzc6wNDU_1d',
   SESSION_HOURS: 6,
@@ -13,10 +16,10 @@ const CONFIG = {
     INVESTIGATION:'INVESTIGATION', INVESTIGATION_EVIDENCE:'INVESTIGATION_EVIDENCE',
     FIVE_WHY:'FIVE_WHY', CAPA:'CAPA', CAPA_EVIDENCE:'CAPA_EVIDENCE', CAPA_VERIFICATION:'CAPA_VERIFICATION',
     MEDICAL:'MEDICAL', COST:'COST', BHXH:'BHXH', MASTER:'MASTER', SETTING:'SETTING',
-    LOG:'LOG', AUDIT_LOG:'AUDIT_LOG'
+    LOG:'LOG', AUDIT_LOG:'AUDIT_LOG', NEAR_MISS:'NEAR_MISS', UNSAFE_ACT:'UNSAFE_ACT', UNSAFE_CONDITION:'UNSAFE_CONDITION', INSPECTION:'INSPECTION', TRAINING:'TRAINING', PPE:'PPE', RISK_ASSESSMENT:'RISK_ASSESSMENT', SYSTEM_BACKUP:'SYSTEM_BACKUP', WORKING_HOURS:'WORKING_HOURS'
   },
   HEADERS: {
-    USER:['UserID','Username','PasswordHash','PasswordSalt','Role','Email','Status','FailedAttempts','LockedUntil','CreatedDate','LastLogin','MustChangePassword'],
+    USER:['UserID','Username','PasswordHash','PasswordSalt','Role','Email','Status','FailedAttempts','LockedUntil','CreatedDate','LastLogin','MustChangePassword','Plant','Department'],
     EMPLOYEE:['EmpID','FullName','Plant','Department','Position','DOB','Gender','HireDate','Status','Phone','Email','UpdatedDate'],
     ACCIDENT:['AccidentID','EmpID','FullName','Department','Plant','Position','Shift','IncidentDate','ReportDate','Location','IncidentType','Classification','Severity','InjuryType','BodyPart','InjuryFactor','ImmediateCause','RootCause','Witness','Description','InitialAction','MedicalRequired','Hospital','LostDays','LostTime','Status','InvestigationStatus','CAPAStatus','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
     ACCIDENT_ATTACHMENT:['FileID','RecordID','RecordType','FileName','MimeType','DriveFileId','DriveUrl','UploadedBy','UploadedDate','Description'],
@@ -24,7 +27,7 @@ const CONFIG = {
     INVESTIGATION:['InvestigationID','AccidentID','Lead','InvestigationDate','Method','ImmediateCause','BasicCause','RootCause','FiveWhySummary','FishboneSummary','Conclusion','Status','ApprovedBy','ApprovedDate','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
     INVESTIGATION_EVIDENCE:['EvidenceID','InvestigationID','AccidentID','EvidenceType','Description','FileID','DriveFileId','DriveUrl','CreatedBy','CreatedDate'],
     FIVE_WHY:['FiveWhyID','InvestigationID','AccidentID','StepNo','Question','Answer','CreatedBy','CreatedDate'],
-    CAPA:['CapaID','AccidentID','InvestigationID','RootCause','ActionType','Action','Assignee','Department','Priority','StartDate','DueDate','Progress','Status','EvidenceRequired','CompletedDate','VerifiedDate','Effectiveness','ClosedDate','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    CAPA:['CapaID','AccidentID','InvestigationID','Plant','RootCause','ActionType','Action','Assignee','Department','Priority','StartDate','DueDate','Progress','Status','EvidenceRequired','CompletedDate','VerifiedDate','Effectiveness','ClosedDate','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
     CAPA_EVIDENCE:['EvidenceID','CapaID','Description','FileID','DriveFileId','DriveUrl','UploadedBy','UploadedDate'],
     CAPA_VERIFICATION:['VerificationID','CapaID','VerifiedBy','VerificationDate','Effective','Findings','FollowUpDate','Status','CreatedDate'],
     MEDICAL:['MedicalID','AccidentID','EmpID','FirstAidTime','Provider','TreatmentType','Hospitalized','AdmissionDate','DischargeDate','Diagnosis','MedicalCost','SickLeaveDays','Notes','CreatedBy','CreatedDate'],
@@ -33,6 +36,15 @@ const CONFIG = {
     MASTER:['BoPhan','Department','NguyenNhan','Cause','YeuToChanThuong','InjuryFactor','TrangThai','Status','IncidentType','Classification','Severity','ActionType','Priority','Effectiveness'],
     SETTING:['Key','Value','Description','UpdatedDate'],
     AUDIT_LOG:['LogID','Timestamp','UserID','Username','Role','Action','Module','RecordID','OldValue','NewValue','Result','Details'],
-    LOG:['LogID','UserID','Action','Timestamp','Details']
+    LOG:['LogID','UserID','Action','Timestamp','Details'],
+    NEAR_MISS:['NearMissID','EventDate','Plant','Department','Location','Description','PotentialSeverity','ImmediateAction','ReportedBy','AssignedTo','Status','IncidentID','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    UNSAFE_ACT:['UnsafeActID','EventDate','Plant','Department','Location','Description','RiskLevel','PersonInvolved','ImmediateAction','AssignedTo','DueDate','Status','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    UNSAFE_CONDITION:['UnsafeConditionID','EventDate','Plant','Department','Location','Description','RiskLevel','ImmediateAction','AssignedTo','DueDate','Status','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    INSPECTION:['InspectionID','InspectionDate','Plant','Department','Area','Checklist','Finding','RiskLevel','Assignee','DueDate','Status','VerifiedBy','VerifiedDate','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    TRAINING:['TrainingID','TrainingDate','Plant','Department','Topic','Trainer','AttendeeCount','DurationHours','ValidityUntil','EvidenceUrl','Status','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    PPE:['PPEID','EmpID','FullName','Plant','Department','PPEType','Size','IssueDate','ExpiryDate','Quantity','Condition','Status','IssuedBy','CreatedDate','UpdatedDate'],
+    RISK_ASSESSMENT:['RiskID','AssessmentDate','Plant','Department','Area','Activity','Hazard','Consequence','Likelihood','Severity','RiskScore','ControlMeasures','ResidualRisk','Owner','ReviewDate','Status','CreatedBy','CreatedDate','UpdatedBy','UpdatedDate'],
+    SYSTEM_BACKUP:['BackupID','BackupDate','SpreadsheetId','DriveFileId','DriveUrl','Status','VerifiedBy','VerifiedDate','Notes'],
+    WORKING_HOURS:['HoursID','Year','Period','Plant','Department','Hours','Source','ApprovedBy','ApprovedDate','CreatedDate']
   }
 };
