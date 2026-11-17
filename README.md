@@ -49,3 +49,10 @@ Các module nghiệp vụ mới có CRUD cơ bản, audit, soft archive và phâ
 - Deploy backend version mới, cập nhật frontend.
 - Không chạy setup trên môi trường đang ghi dữ liệu nếu chưa có backup gần nhất.
 - Version 3.0 bổ sung sheet/header; không xóa dữ liệu cũ.
+
+
+## 8. EHS Manager 3.1 – Hướng dẫn & Public Dashboard
+- Menu **Hướng dẫn sử dụng** chứa quy trình thao tác cho 10 module và nguyên tắc bảo mật/dữ liệu.
+- Menu **Dashboard công khai** mở `frontend/public-dashboard.html` trong tab mới. Trang này gọi action `getPublicDashboard` không cần đăng nhập và CHỈ trả số liệu tổng hợp (KPI, số lượng theo module, Incident theo tháng); không trả tên nhân viên, mã hồ sơ, mô tả, hồ sơ y tế, bằng chứng hoặc nội dung điều tra.
+- Dashboard công khai là công khai theo URL GitHub Pages. Chỉ đưa URL này lên mạng nội bộ/trang công ty sau khi bộ phận EHS và IT duyệt chính sách công bố. Nếu không muốn công khai Internet, giới hạn quyền truy cập ở lớp hosting/proxy hoặc không chia sẻ URL; GitHub Pages public repository không phải cơ chế xác thực.
+- API `getPublicDashboard` được thiết kế chỉ đọc và tổng hợp. Trước vận hành, rà soát các chỉ số tổng hợp có thể nhạy cảm theo quy định công ty và kiểm tra CORS/deployment thực tế.
