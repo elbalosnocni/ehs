@@ -19,3 +19,10 @@
 - Bổ sung ví dụ phân biệt Incident, Near Miss, Unsafe Act, Unsafe Condition, Inspection và Risk Assessment.
 - Làm rõ Investigation và CAPA là các bước xử lý tiếp theo, không phải tab khai báo nguy cơ ban đầu; Training và PPE dùng cho nghiệp vụ đào tạo/cấp phát.
 - Bổ sung bảng tra nhanh tình huống → tab khai báo.
+
+## 3.2.0 – Dashboard KPI & bộ lọc
+- Bộ lọc năm/nhà máy/bộ phận chạy phía backend, tôn trọng scope tài khoản.
+- Chuẩn hóa parser ngày Date, ISO, dd/MM/yyyy và serial date.
+- CAPA/Investigation lọc theo kỳ và Incident liên kết.
+- Cảnh báo thiếu giờ công; không hiển thị null khó hiểu.
+- Recordable dùng cờ điều trị/nghỉ việc, LostDays và Classification; cần EHS xác nhận quy tắc chính thức.

@@ -69,3 +69,9 @@ Dùng nguyên tắc phân loại nhanh trong tab **Hướng dẫn sử dụng**:
 - Cần phân tích nguyên nhân của Incident đã ghi nhận → **Investigation**; giao và theo dõi hành động khắc phục/phòng ngừa → **CAPA** (trong khu vực Điều tra & CAPA).
 
 Đây là hướng dẫn thao tác để chọn đúng chức năng phần mềm. Trường hợp nghiêm trọng hoặc chưa rõ phân loại, ưu tiên bảo đảm an toàn, báo quản lý/EHS ngay và để EHS quyết định phân loại theo quy trình nội bộ. Không trì hoãn thông báo khẩn cấp để chờ khai báo trên hệ thống.
+
+## 10. Dashboard 3.2.0
+- Bộ lọc năm, nhà máy, bộ phận; áp dụng ở backend và tôn trọng phạm vi tài khoản.
+- FR/TRIR/SR hiện “Chưa cấu hình” nếu thiếu giờ công; không tự ước tính giờ công.
+- Recordable tạm tính từ MedicalRequired, LostTime, LostDays và Classification; cần EHS phê duyệt quy tắc trước nghiệm thu.
+- Sau cập nhật cần deploy phiên bản Apps Script mới và publish lại GitHub Pages.
