@@ -56,3 +56,16 @@ Các module nghiệp vụ mới có CRUD cơ bản, audit, soft archive và phâ
 - Menu **Dashboard công khai** mở `frontend/public-dashboard.html` trong tab mới. Trang này gọi action `getPublicDashboard` không cần đăng nhập và CHỈ trả số liệu tổng hợp (KPI, số lượng theo module, Incident theo tháng); không trả tên nhân viên, mã hồ sơ, mô tả, hồ sơ y tế, bằng chứng hoặc nội dung điều tra.
 - Dashboard công khai là công khai theo URL GitHub Pages. Chỉ đưa URL này lên mạng nội bộ/trang công ty sau khi bộ phận EHS và IT duyệt chính sách công bố. Nếu không muốn công khai Internet, giới hạn quyền truy cập ở lớp hosting/proxy hoặc không chia sẻ URL; GitHub Pages public repository không phải cơ chế xác thực.
 - API `getPublicDashboard` được thiết kế chỉ đọc và tổng hợp. Trước vận hành, rà soát các chỉ số tổng hợp có thể nhạy cảm theo quy định công ty và kiểm tra CORS/deployment thực tế.
+
+## 9. Hướng dẫn chọn tab khai báo (3.1.1)
+Dùng nguyên tắc phân loại nhanh trong tab **Hướng dẫn sử dụng**:
+- Đã có thương tích/thiệt hại hoặc sự cố đã xảy ra → **Incident**.
+- Suýt gây hậu quả nhưng chưa có thương tích/thiệt hại → **Near Miss**.
+- Nguy cơ xuất phát từ hành vi/cách làm của con người → **Unsafe Act**.
+- Nguy cơ xuất phát từ tình trạng thiết bị, nơi làm việc hoặc môi trường → **Unsafe Condition**.
+- Đang thực hiện đợt kiểm tra có kế hoạch/checklist → **Inspection**.
+- Cần nhận diện mối nguy và chấm/đánh giá rủi ro của hoạt động → **Risk Assessment**.
+- Ghi nhận một khóa/buổi đào tạo → **Training**; ghi cấp phát/đổi/theo dõi bảo hộ → **PPE**.
+- Cần phân tích nguyên nhân của Incident đã ghi nhận → **Investigation**; giao và theo dõi hành động khắc phục/phòng ngừa → **CAPA** (trong khu vực Điều tra & CAPA).
+
+Đây là hướng dẫn thao tác để chọn đúng chức năng phần mềm. Trường hợp nghiêm trọng hoặc chưa rõ phân loại, ưu tiên bảo đảm an toàn, báo quản lý/EHS ngay và để EHS quyết định phân loại theo quy trình nội bộ. Không trì hoãn thông báo khẩn cấp để chờ khai báo trên hệ thống.
